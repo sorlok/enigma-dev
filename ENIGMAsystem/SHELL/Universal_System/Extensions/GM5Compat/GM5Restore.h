@@ -2,8 +2,8 @@
  * TODO: Currently unsure of how the licensing here works.
 **/
 
-#ifndef ENIGMA_GM5COMPAT_FUNCTIONS__H
-#define ENIGMA_GM5COMPAT_FUNCTIONS__H
+#ifndef ENIGMA_GM5COMPAT_RESTORE__H
+#define ENIGMA_GM5COMPAT_RESTORE__H
 
 
 namespace enigma_user
@@ -26,5 +26,5 @@ void discard_all();
 
 }
 
-#endif // ENIGMA_GM5COMPAT_FUNCTIONS__H
+#endif // ENIGMA_GM5COMPAT_RESTORE__H
 

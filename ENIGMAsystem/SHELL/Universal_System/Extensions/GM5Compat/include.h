@@ -3,4 +3,4 @@
 **/
 
 #include "GM5Restore.h"
-//TODO: Others
+#include "GM5Misc.h"
