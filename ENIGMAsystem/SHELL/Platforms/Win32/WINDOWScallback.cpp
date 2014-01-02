@@ -138,9 +138,14 @@ namespace enigma
             return 0;
 
         case WM_SETCURSOR:
-            SetCursor(LoadCursor(NULL, currentCursor));
+			// Set the user cursor if the mouse is in the client area of the window, otherwise let Windows handle setting the cursor
+			// since it knows how to set the gripper cursor for window resizing. This is exactly how GM handles it.
+			if (LOWORD(lParam) == HTCLIENT) {
+				SetCursor(LoadCursor(NULL, currentCursor));
+			} else {
+				DefWindowProc(hWnd, message, wParam, lParam);
+			}
             return 0;
-
         case WM_CHAR:
             keyboard_lastchar = string(1,wParam);
 			keyboard_string += keyboard_lastchar;
