@@ -12,6 +12,14 @@
 namespace enigma_user
 {
 
+//Placing these here allows Enigma to identify them as globals, so 
+// they can be set properly from any script.
+extern gs_scalar pen_size;
+extern int brush_style;
+extern int brush_color;
+extern int pen_color;
+
+
 //Brush styles.
 enum {
   bs_solid  = 0,
@@ -34,7 +42,7 @@ void screen_gamma(double r, double g, double b);
 //Drawing - Wrappers.
 void draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
 
-//Drawing - Related
+//Drawing - Related (TODO: remove)
 void draw_set_pen_color(int clr);
 void draw_set_pen_size(gs_scalar sz);
 void draw_set_brush_color(int clr);

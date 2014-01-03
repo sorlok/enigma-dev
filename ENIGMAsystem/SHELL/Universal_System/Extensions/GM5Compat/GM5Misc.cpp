@@ -12,12 +12,6 @@
 
 namespace {
 
-//GM5 draw state.
-int pen_color = enigma_user::c_black;
-gs_scalar pen_size = 1;
-int brush_color = enigma_user::c_black;
-int brush_style = enigma_user::bs_solid; 
-
 
 template <typename T>
 void swap(T& val1, T& val2){
@@ -30,6 +24,13 @@ void swap(T& val1, T& val2){
 
 namespace enigma_user
 {
+
+//GM5 draw state.
+gs_scalar pen_size = 1;
+int brush_style = enigma_user::bs_solid; 
+int pen_color = enigma_user::c_black;
+int brush_color = enigma_user::c_black;
+
 
 void set_graphics_mode(bool exclusive, int horizRes, int colorDepth, int freq, bool fullscreen, int winScale, int fullScale)
 {
