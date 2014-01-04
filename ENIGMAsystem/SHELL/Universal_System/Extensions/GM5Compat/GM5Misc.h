@@ -42,6 +42,7 @@ void screen_gamma(double r, double g, double b);
 //Drawing - Wrappers.
 void draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
 void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
+void draw_circle(gs_scalar x, gs_scalar y, float radius);
 
 //Drawing - Related (TODO: remove)
 void draw_set_pen_color(int clr);

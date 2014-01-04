@@ -141,6 +141,55 @@ void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
   }
 }
 
+void draw_circle(gs_scalar x, gs_scalar y, float radius)
+{
+  int lwid = std::max(1,(int)round(pen_size));
+
+  //Shuffle the radius a bit.
+  if (lwid%2 == 0) {
+    radius -= 1;
+  }
+
+  //Fill the shape, if we have the correct brush style.
+  //Note: At the moment, we treat all unsupported brush styles as "solid"; only "hollow" avoids drawing.
+  if (brush_style != bs_hollow) {
+    draw_set_color(brush_color);
+    draw_circle(x,y,radius,false);
+  }
+
+  //This is borrowed from General drawing code.
+  draw_set_color(pen_color);
+  double pr = 2 * M_PI / draw_get_circle_precision();
+  double oldX = 0.0;
+  double oldY = 0.0;
+  for (double i = 0; i <= 2*M_PI; i += pr) {
+    double xc1=cos(i)*radius;
+    double yc1=sin(i)*radius;
+    double newX = x+xc1;
+    double newY = y+yc1;
+    if (i>0) {
+      draw_line_width(oldX,oldY, newX, newY, lwid);
+    }
+    oldX = newX;
+    oldY = newY;
+  }
+
+  //Similar to the ellipse drawing code, this overlays patches to the circle's shape.
+  //It is also inefficient, but necessary for large pen widths.
+  oldX = oldY = 0.0;
+  for (double i = 0; i <= 2*M_PI; i += pr) {
+    double xc1=cos(i+pr/2)*radius;
+    double yc1=sin(i+pr/2)*radius;
+    double newX = x+xc1;
+    double newY = y+yc1;
+    if (i>0) {
+      draw_line_width(oldX,oldY, newX, newY, lwid);
+    }
+    oldX = newX;
+    oldY = newY;
+  }
+}
+
 
 void draw_set_pen_color(int clr)
 {
