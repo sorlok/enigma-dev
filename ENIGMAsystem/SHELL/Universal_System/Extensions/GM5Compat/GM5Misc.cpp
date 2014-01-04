@@ -75,6 +75,31 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 }
 
 
+void draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3)
+{
+  int lwid = std::max(1,(int)round(pen_size));
+
+  //Fill the shape, if we have the correct brush style.
+  //Note: At the moment, we treat all unsupported brush styles as "solid"; only "hollow" avoids drawing.
+  if (brush_style != bs_hollow) {
+    draw_set_color(brush_color);
+    draw_triangle(x1,y1,x2,y2,x3,y3,false);
+  }
+
+  //Draw the outline.
+  draw_set_color(pen_color);
+  draw_line_width(x1,y1, x2,y2, lwid);
+  draw_line_width(x2,y2, x3,y3, lwid);
+  draw_line_width(x3,y3, x1,y1, lwid);
+
+  //We fake triangle joints with circles.
+  //TODO: Triangle coords are still off slightly, not just on the joints.
+  draw_circle(x1,y1,lwid/2.0, false);
+  draw_circle(x2,y2,lwid/2.0, false);
+  draw_circle(x3,y3,lwid/2.0, false);
+}
+
+
 void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
   int lwid = std::max(1,(int)round(pen_size));

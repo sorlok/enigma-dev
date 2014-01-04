@@ -14,6 +14,7 @@ namespace enigma_user
 
 //Placing these here allows Enigma to identify them as globals, so 
 // they can be set properly from any script.
+//BUG: Invalid statements such as "brush_color = dafadf;" are valid for these.
 extern gs_scalar pen_size;
 extern int brush_style;
 extern int brush_color;
@@ -41,6 +42,7 @@ void screen_gamma(double r, double g, double b);
 
 //Drawing - Wrappers.
 void draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
+void draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3);
 void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
 void draw_circle(gs_scalar x, gs_scalar y, float radius);
 
