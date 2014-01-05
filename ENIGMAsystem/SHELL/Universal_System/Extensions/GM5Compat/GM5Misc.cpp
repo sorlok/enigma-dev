@@ -5,12 +5,26 @@
 #include "GM5Misc.h"
 
 #include <cmath>
+#include <list>
 #include <algorithm>
+#include <cstdio>
 
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 namespace {
+
+//TODO: This likely exists somewhere.
+struct IntPt {
+  int x;
+  int y;
+  IntPt(int x, int y) : x(x),y(y) {}
+};
+
+//The current polygon's vertices.
+std::list<IntPt> currPoly;
 
 
 template <typename T>
@@ -236,20 +250,87 @@ void draw_set_brush_style(int sty)
   brush_style = sty;
 }
 
-void draw_text_sprite(int x, int y, string str, int sep, int w, int sprite, int firstChar, int scale)
+void draw_text_sprite(int x, int y, string str, int sep, int lineWidth, int sprite, int firstChar, int scale)
 {
+  //Easy lookup of width/height, accounting for scale.
+  int w = sprite_get_width(sprite)  * scale;
+  int h = sprite_get_height(sprite) * scale;
+
+  //Magic number: "default" line separation height.
+  if (sep == -1) {
+    sep = h + 2; //Just a guess. 
+  }
+
+  //Now, simply draw each letter via sub-images, accounting for the width if required. 
+  int offX = 0;
+  int offY = 0;
+  size_t lastSizeCheck = 0;
+  for (size_t i=0; i<str.length(); i++) {
+    //Wrap?
+    if (lineWidth!=-1 && i>= lastSizeCheck) {
+      //Find the next space or hyphen.
+      lastSizeCheck=i+1;
+      for (; lastSizeCheck<str.length(); lastSizeCheck++) {
+        if (str[lastSizeCheck]==' ' || str[lastSizeCheck]=='-') { break; }
+      }
+
+      //Can we fit the next word?
+      if (offX + (lastSizeCheck-i)*w >= lineWidth) {
+        offX = 0;
+        offY += sep;
+      }
+    }
+
+    //Draw, update.
+    char c = str[i];
+    int subIndex = c - firstChar;
+    draw_sprite_stretched(sprite, subIndex, x+offX, y+offY, w, h);
+    offX += w;
+  }
 }
 
 void draw_polygon_begin()
 {
+  currPoly.clear();
 }
 
 void draw_polygon_vertex(int x, int y)
 {
+  currPoly.push_back(IntPt(x,y));
 }
 
 void draw_polygon_end()
 {
+  int lwid = std::max(1,(int)round(pen_size));
+  if (currPoly.size() > 1) {
+
+    //Fill the shape, if we have the correct brush style.
+    //Note: At the moment, we treat all unsupported brush styles as "solid"; only "hollow" avoids drawing.
+    //Note: It seems that GM5 ignores the brush_style for polygons. More testing needed.
+    //if (brush_style != bs_hollow) {
+    if (true) {
+      draw_set_color(brush_color);
+      draw_primitive_begin(pr_trianglefan);
+      for (std::list<IntPt>::iterator it = currPoly.begin();it!=currPoly.end(); it++) {
+        draw_vertex(it->x, it->y);
+      }
+      draw_primitive_end();
+    }
+
+
+    //Draw the line around it.
+    draw_set_color(pen_color);
+    IntPt lastPt = *(--currPoly.end());
+    for (std::list<IntPt>::iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
+      IntPt currPt = *it;
+      draw_line_width(lastPt.x,lastPt.y, currPt.x,currPt.y , lwid);
+      lastPt = currPt;
+    }
+
+  }
+
+  //Done
+  currPoly.clear();
 }
 
 void sound_frequency(int index, double value)
