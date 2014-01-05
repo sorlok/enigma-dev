@@ -63,6 +63,7 @@ void draw_polygon_end();
 
 //Sound
 void sound_frequency(int index, double value);
+int sound_add(string fName, int buffers, bool useEffects, bool loadOnUse);
 
 }
 

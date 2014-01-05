@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstdio>
 
+#include "Audio_Systems/General/ASbasic.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSsprite.h"
@@ -335,6 +336,14 @@ void draw_polygon_end()
 
 void sound_frequency(int index, double value)
 {
+}
+
+int sound_add(string fName, int buffers, bool useEffects, bool loadOnUse)
+{
+  //NOTE: This is super-experimental
+  //0 = "normal" sound
+  //!loadOnUse is for "preload", and might work?
+  return sound_add(fName, 0, !loadOnUse);
 }
 
 
