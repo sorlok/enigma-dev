@@ -24,6 +24,7 @@
 #include "Universal_System/roomsystem.h"
 
 #include <vector>
+#include <iostream>
 using std::vector;
 
 namespace enigma {
@@ -32,6 +33,11 @@ namespace enigma {
 
 namespace enigma_user
 {
+
+void print_line(const std::string& line)
+{
+  std::cout <<"LOG: \"" <<line <<"\"\n";
+}
 
 void draw_point(gs_scalar x, gs_scalar y)
 {
