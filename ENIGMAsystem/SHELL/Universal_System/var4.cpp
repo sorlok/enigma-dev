@@ -16,6 +16,7 @@
 **/
 
 #include <map>
+#include <sstream>
 #include <string>
 #include <math.h>
 using namespace std;
@@ -514,12 +515,59 @@ double    var::operator+ () const { return +(double)(**this); }
 #include "libEGMstd.h"
 string toString(const variant &a)
 {
-  char buf[32];
-  if (a.type == real)
-    return string(buf,sprintf(buf,"%g",a.rval.d));
+//  char buf[32];
+  if (a.type == real) {
+    double dVal = a.rval.d;
+    int iVal = (int)a.rval.d;
+    std::stringstream ss;
+    if (vareq(dVal,iVal)) {
+      ss <<iVal;
+    } else {
+      ss <<dVal; //TODO: Approximation. Actually requires first 2 digits only. Need to check GMS's policy on this.
+    }
+    return ss.str();
+
+//    return string(buf,sprintf(buf,"%g",a.rval.d));
+  }
   return a.sval;
 }
 string toString(const var &a) {
   return toString(*a);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
