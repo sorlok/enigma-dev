@@ -51,8 +51,13 @@ namespace enigma
   {
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
-      gs_scalar image_index;
       gs_scalar image_speed;
+
+      gs_scalar image_index;
+      gs_scalar image_single; //Older combination of image_index and image_speed.
+
+      //Access for image_index, taking image_single into account.
+      gs_scalar image_index_actual () { return image_single>=0?image_single:image_index; }
 
       //Depth
       enigma::depthv  depth;

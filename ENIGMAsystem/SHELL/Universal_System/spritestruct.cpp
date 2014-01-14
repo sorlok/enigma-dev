@@ -565,7 +565,7 @@ int sprite_get_texture(int sprite,int subimage)
     if (!get_sprite(spr,sprite))
         return 0;
 
-    const int usi = subimage >= 0 ? (subimage % spr->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr->subcount;
+    const int usi = subimage >= 0 ? (subimage % spr->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index_actual()) % spr->subcount;
     return spr->texturearray[usi];
 }
 
