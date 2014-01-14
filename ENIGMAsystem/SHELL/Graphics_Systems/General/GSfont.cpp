@@ -354,21 +354,40 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
   //Now, simply draw each letter via sub-images, accounting for the width if required. 
   int offX = 0;
   int offY = 0;
+  char prev_c = '\0'; //Most recent character drawn.
   for (size_t i=0; i<str.length(); i++) {
-    //Draw, update.
+    //Fetch the next character to be drawn.
     char c = str[i];
+
+    //A line break can occur here if we are starting a new word that won't fit.
+    if (prev_c==' ' && c!= ' ') {
+      size_t word_len = str.find(' ',i);
+      if (word_len != string::npos) {
+        if (offX + w*(word_len-i)  > lineWidth) {
+          offX = 0;
+          offY += sep;
+        }
+      }
+    }
+
+    //Draw, update.
     int subIndex = c - firstChar;
     draw_sprite_stretched(sprite, subIndex, x+offX, y+offY, w, h);
     offX += w;
 
     //Wrap if we've passed a wrappable character. Note that, contrary to GM5's documentation,
     //line-wrapping for text_sprites does NOT occur after hyphens. Only spaces break the line.
+    //Note: This wrap and the previous wrap cannot trigger at the same time, as one relies on 
+    //      c being ' ' and the other, the reverse.
     if (lineWidth!=-1 && c==' ') {
       if (offX+w  > lineWidth) {
         offX = 0;
         offY += sep;
       }
     }
+
+    //Next
+    prev_c = c;
   }
 }
 
