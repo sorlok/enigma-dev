@@ -24,6 +24,7 @@
 #include "depth_draw.h"
 #include "graphics_object.h"
 #include <floatcomp.h>
+#include <iostream>
 
 namespace enigma
 {
@@ -48,6 +49,18 @@ namespace enigma
     myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
   }
   void depthv::remove() {
+//    std::cout <<"depth::remove()\n";
+//    std::cout <<"   this: " <<this <<"\n";
+//    std::cout <<"   myiter: " <<myiter <<"\n";
+//    std::cout <<"   myiter->inst: " <<myiter->inst <<"\n";
+//    std::cout <<"   myiter->inst->id: " <<myiter->inst->id <<"\n";
+//    std::cout <<"   id_to_currentnextdepth entries: " <<id_to_currentnextdepth.size() <<"\n";
+    //TODO: Temp: No idea why we are encountering cases where this is null. This "fix" may leak memory!
+    if (!myiter) { 
+      std::cout <<"ERROR: NULL myiter in depthv::remove(); skipping.\n";
+      return; 
+    }
+
     map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
     if (it == id_to_currentnextdepth.end()) { // Local value is valid, use it.
       drawing_depths[rval.d].draw_events->unlink(myiter);

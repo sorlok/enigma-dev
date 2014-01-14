@@ -368,6 +368,8 @@ int main(int argc,char** argv)
 		frames_count++;
 	}
 
+std::cout <<"Game loop over; is_ending set to: " <<game_isending <<"\n";
+
 	end:
 	enigma::game_ending();
   glXDestroyContext(disp,glxc);
