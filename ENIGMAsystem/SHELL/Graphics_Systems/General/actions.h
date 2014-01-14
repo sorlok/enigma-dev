@@ -55,6 +55,7 @@ inline void action_sprite_set(const double spritep, const  double subimage, cons
     inst->sprite_index=spritep;
 	if ((int)subimage !=-1) inst->image_index=subimage;
 	inst->image_speed=speed;
+        inst->image_single=-1; 
 }
 
 inline void action_draw_text(const string text, const gs_scalar x, const gs_scalar y) {
