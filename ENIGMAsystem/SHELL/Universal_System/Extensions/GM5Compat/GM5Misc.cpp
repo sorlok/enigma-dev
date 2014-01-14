@@ -251,7 +251,7 @@ void draw_set_brush_style(int sty)
   brush_style = sty;
 }
 
-void draw_text_sprite(int x, int y, string str, int sep, int lineWidth, int sprite, int firstChar, int scale)
+/*void draw_text_sprite(int x, int y, string str, int sep, int lineWidth, int sprite, int firstChar, int scale)
 {
   //Easy lookup of width/height, accounting for scale.
   int w = sprite_get_width(sprite)  * scale;
@@ -288,7 +288,7 @@ void draw_text_sprite(int x, int y, string str, int sep, int lineWidth, int spri
     draw_sprite_stretched(sprite, subIndex, x+offX, y+offY, w, h);
     offX += w;
   }
-}
+}*/
 
 void draw_polygon_begin()
 {

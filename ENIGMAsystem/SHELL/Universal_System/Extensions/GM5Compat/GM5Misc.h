@@ -54,7 +54,7 @@ void draw_set_brush_style(int sty);
 
 
 //Drawing - TextSprite
-void draw_text_sprite(int x, int y, string str, int sep, int lineWidth, int sprite, int firstChar, int scale);
+//void draw_text_sprite(int x, int y, string str, int sep, int lineWidth, int sprite, int firstChar, int scale);
 
 //Drawing - Polygons
 void draw_polygon_begin();
