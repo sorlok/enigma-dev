@@ -515,19 +515,15 @@ double    var::operator+ () const { return +(double)(**this); }
 #include "libEGMstd.h"
 string toString(const variant &a)
 {
-//  char buf[32];
   if (a.type == real) {
+    //Ensure that integral types don't pick up any baggage from being stored 
+    //  as a double in a var-type.
     double dVal = a.rval.d;
-    int iVal = (int)a.rval.d;
-    std::stringstream ss;
-    if (vareq(dVal,iVal)) {
-      ss <<iVal;
-    } else {
-      ss <<dVal; //TODO: Approximation. Actually requires first 2 digits only. Need to check GMS's policy on this.
+    long lVal = (long)dVal;
+    if (dVal == lVal) {
+      return toString(lVal);
     }
-    return ss.str();
-
-//    return string(buf,sprintf(buf,"%g",a.rval.d));
+    return toString(dVal);
   }
   return a.sval;
 }
