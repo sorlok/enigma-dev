@@ -51,6 +51,7 @@ namespace enigma
       int sprite_index;
       gs_scalar image_index;
       gs_scalar image_speed;
+      int image_single; //Older combination of image_index and image_speed.
 
       //Depth
       enigma::depthv  depth;
