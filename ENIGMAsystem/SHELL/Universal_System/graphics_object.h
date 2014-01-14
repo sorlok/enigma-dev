@@ -36,6 +36,167 @@
 
 namespace enigma
 {
+  class ImageIndex {
+  public:
+    ImageIndex() : value(0), manual(true) {}
+
+    ImageIndex& operator=(int value) { //Using "int" will always reset the substep.
+      this->value = value;
+      manual = true;
+      return *this;
+    }
+
+    ImageIndex& operator+=(int value) {
+      this->value += value;
+      manual = true;
+      return *this;
+    }
+
+    ImageIndex& operator-=(int value) {
+      this->value -= value;
+      manual = true;
+      return *this;
+    }
+
+    ImageIndex& operator*=(int value) {
+      this->value *= value;
+      manual = true;
+      return *this;
+    }
+
+    template <typename T>
+    bool operator>=(const T& value) const { return this->value >= value; }
+    template <typename T>
+    bool operator>(const T& value) const { return this->value > value; }
+    template <typename T>
+    bool operator<=(const T& value) const { return this->value <= value; }
+    template <typename T>
+    bool operator<(const T& value) const { return this->value < value; }
+    template <typename T>
+    bool operator==(const T& value) const { return this->value == value; }
+
+
+    void incr(gs_scalar speed, int sprite_num) { //Called in the event loop.
+      value = fmod((speed < 0)?(sprite_num + value - fmod(abs(speed),sprite_num)):(value + speed), sprite_num);
+    }
+
+    void set(gs_scalar value, bool manual) { //To be called by image_single.
+      this->value = value;
+      this->manual = manual;
+    }
+
+    bool isManual() const { //To be called by image_single.
+      return manual;
+    }
+
+    operator gs_scalar() const {
+      return value;
+    }
+
+  private:
+    gs_scalar value;   //The value returned by operator gs_scalar(). It includes the "substep" after the decimal point.
+    bool manual; //Was this value set manually by the user? (else, image_single set it).
+  };
+
+
+  class ImageSingle {
+  public:
+    ImageSingle(ImageIndex& img_ind) : img_ind(img_ind), value(0), oldImgIndex(0) {}
+
+    ImageSingle& operator=(int value) {
+      //First, handle the linked image_index.
+      if (value>=0) {
+        if (img_ind.isManual()) { oldImgIndex = img_ind; } //Save if it was manually set.
+        img_ind.set(value, false);
+      } else {
+        img_ind.set(oldImgIndex, true);
+      }
+
+      //Now, set the value.
+      this->value = value;
+      return *this;
+    }
+
+    ImageSingle& operator=(const ImageIndex& value) {
+      //First, handle the linked image_index.
+      if (value>=0) {
+        if (img_ind.isManual()) { oldImgIndex = img_ind; } //Save if it was manually set.
+        img_ind.set(static_cast<gs_scalar>(value), false);
+      } else {
+        img_ind.set(oldImgIndex, true);
+      }
+
+      //Now, set the value.
+      this->value = static_cast<gs_scalar>(value);
+      return *this;
+    }
+
+    ImageSingle& operator+=(int value) {
+      //First, handle the linked image_index.
+      if (value>=0) {
+        if (img_ind.isManual()) { oldImgIndex = img_ind; } //Save if it was manually set.
+        img_ind.set(value, false);
+      } else {
+        img_ind.set(oldImgIndex, true);
+      }
+
+      //Now, set the value.
+      this->value += value;
+      return *this;
+    }
+
+    ImageSingle& operator-=(int value) {
+      //First, handle the linked image_index.
+      if (value>=0) {
+        if (img_ind.isManual()) { oldImgIndex = img_ind; } //Save if it was manually set.
+        img_ind.set(value, false);
+      } else {
+        img_ind.set(oldImgIndex, true);
+      }
+
+      //Now, set the value.
+      this->value -= value;
+      return *this;
+    }
+
+    ImageSingle& operator*=(int value) {
+      //First, handle the linked image_index.
+      if (value>=0) {
+        if (img_ind.isManual()) { oldImgIndex = img_ind; } //Save if it was manually set.
+        img_ind.set(value, false);
+      } else {
+        img_ind.set(oldImgIndex, true);
+      }
+
+      //Now, set the value.
+      this->value *= value;
+      return *this;
+    }
+
+    template <typename T>
+    bool operator>=(const T& value) const { return this->value >= value; }
+    template <typename T>
+    bool operator>(const T& value) const { return this->value > value; }
+    template <typename T>
+    bool operator<=(const T& value) const { return this->value <= value; }
+    template <typename T>
+    bool operator<(const T& value) const { return this->value < value; }
+    template <typename T>
+    bool operator==(const T& value) const { return this->value == value; }
+
+   operator int() {
+      return value;
+   }
+
+  private:
+    ImageIndex& img_ind; //The image_index reference we are monitoring.
+    int value;        //The value returned by operator int()
+    gs_scalar oldImgIndex;  //The value to return ImageIndex to when ImageSingle is set to -1.
+  };
+
+
+
+
   extern bool gui_used;
   struct depthv: multifunction_variant {
     INHERIT_OPERATORS(depthv)
@@ -49,8 +210,10 @@ namespace enigma
   {
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
-      gs_scalar image_index;
       gs_scalar image_speed;
+
+      ImageIndex image_index;
+      ImageSingle image_single; //Older combination of image_index and image_speed.
 
       //Depth
       enigma::depthv  depth;

@@ -53,6 +53,7 @@ inline void action_draw_rectangle(const gs_scalar x1, const gs_scalar y1, const 
 inline void action_sprite_set(const double spritep, const  double subimage, const double speed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     inst->sprite_index=spritep;
+	inst->image_single=-1;
 	if ((int)subimage !=-1) inst->image_index=subimage;
 	inst->image_speed=speed;
 }
