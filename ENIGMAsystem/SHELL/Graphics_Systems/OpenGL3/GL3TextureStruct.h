@@ -20,8 +20,8 @@
 #ifndef ENIGMA_GL3_TEXTURESTRUCT__H
 #define ENIGMA_GL3_TEXTURESTRUCT__H
 
-#include <vector>
-using std::vector;
+#include <map>
+using std::map;
 
 struct TextureStruct {
 	unsigned gltex;
@@ -30,7 +30,7 @@ struct TextureStruct {
 	TextureStruct(unsigned gtex);
 	~TextureStruct();
 };
-extern vector<TextureStruct*> textureStructs;
+extern map<int, TextureStruct*> textureStructs;
 
 unsigned get_texture(int texid);
 
