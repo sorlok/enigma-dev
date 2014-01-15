@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <set>
+#include <string>
 #include <algorithm>
 
 using namespace std;
@@ -116,7 +118,10 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 			i++; continue; 
 		}
 		parent = parsed_objects.find(i->second->parent);
-		
+
+                //If variables are zero by default, we can init them here.		
+                std::set<std::string> to_init;
+
 		wto << "  \n  struct OBJ_" << i->second->name;
 		if (setting::inherit_objects && parsed_objects.find(i->second->parent) != parsed_objects.end()) {
 			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name;
@@ -203,8 +208,12 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               cout << "enigma: scopedebug: variable `" << ii->first << "' from object `" << i->second->name << "' will be used from the " << (writeit ? "object" : "global") << " scope." << endl;
             }
           }
-          if (writeit)
+          if (writeit) {
+            if (tdefault(ii->second.type) == "var") {
+              to_init.insert(ii->first);  //TODO: Need to see what (ii->second.prefix) and (ii->second.suffix) actually do.
+            }
             wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
+          }
         }
 
         // Next, we write the list of all the scripts this object will hoard a copy of for itself.
@@ -405,6 +414,12 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
 
           wto << "      enigma::constructor(this);\n";
+
+          //Init to zero?
+          for (std::set<std::string>::const_iterator it = to_init.begin(); it!=to_init.end(); it++) {
+            wto << "      " <<(*it) <<" = 0;\n";
+          }
+
           wto << "    }\n\n";
 
 		
