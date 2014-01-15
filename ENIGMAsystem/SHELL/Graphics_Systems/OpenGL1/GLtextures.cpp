@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <set>
 #include <stdio.h>
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
@@ -30,7 +31,13 @@
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
-vector<TextureStruct*> textureStructs(0);
+map<int, TextureStruct*> textureStructs;
+
+namespace {
+///IDs reclaimed for use by TextureStructs. 
+///If empty, the next-largest ID will be assigned.
+std::set<int> free_tex_ids;
+}
 
 namespace enigma_user {
 extern int room_width, room_height;
@@ -54,7 +61,8 @@ TextureStruct::~TextureStruct()
 }
 
 unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size())? -1 : textureStructs[texid]->gltex;
+	map<int, TextureStruct*>::const_iterator it = textureStructs.find(texid);
+	return it==textureStructs.end() ? -1 : it->second->gltex;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -86,12 +94,20 @@ namespace enigma
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
-    textureStructs.push_back(textureStruct);
     
     //texture must be constructed before unbinding the texture so that it can apply its initial sampler state
     glBindTexture(GL_TEXTURE_2D, 0);
     
-    return textureStructs.size()-1;
+    //Choose an ID for it.
+    int texID = textureStructs.size();
+    if (!free_tex_ids.empty()) {
+      texID = *free_tex_ids.begin();
+      free_tex_ids.erase(texID);
+    }
+
+    //Add it to the lookup
+    textureStructs[texID] = textureStruct;
+    return texID;
   }
 
   int graphics_duplicate_texture(int tex, bool mipmap)
@@ -148,6 +164,8 @@ namespace enigma
   void graphics_delete_texture(int texid)
   {
     delete textureStructs[texid];
+    textureStructs.erase(tex);
+    free_tex_ids.insert(tex);
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
