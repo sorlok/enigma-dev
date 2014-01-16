@@ -20,12 +20,12 @@
 
 #include "Direct3D11Headers.h"
 
-#include <vector>
-using std::vector;
+#include <map>
+using std::map;
 
 struct TextureStruct {
 
 };
-extern vector<TextureStruct*> textureStructs;
+extern map<int, TextureStruct*> textureStructs;
 
 #endif

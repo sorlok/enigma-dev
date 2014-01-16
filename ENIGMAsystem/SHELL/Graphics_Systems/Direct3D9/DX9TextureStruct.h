@@ -20,8 +20,8 @@
 
 #include "Direct3D9Headers.h"
 
-#include <vector>
-using std::vector;
+#include <map>
+using std::map;
 
 struct TextureStruct {
 	LPDIRECT3DTEXTURE9 gTexture;
@@ -34,8 +34,11 @@ struct TextureStruct {
 		
 	}
 };
-extern vector<TextureStruct*> textureStructs;
+extern map<int, TextureStruct*> textureStructs;
 
 LPDIRECT3DTEXTURE9 get_texture(int texid);
+
+//Reserves the next available texture ID. You *must* use this immediately (e.g., add it to textureStructs).
+int reserve_texture_id();
 
 #endif
