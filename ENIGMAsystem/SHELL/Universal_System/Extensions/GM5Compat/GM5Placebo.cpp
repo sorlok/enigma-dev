@@ -51,6 +51,27 @@ void discard_all()
 {
 }
 
+void set_graphics_mode(bool exclusive, int horizRes, int colorDepth, int freq, bool fullscreen, int winScale, int fullScale)
+{
+}
+
+void screen_gamma(double r, double g, double b)
+{
+}
+
+void sound_frequency(int index, double value)
+{
+}
+
+int sound_add(string fName, int buffers, bool useEffects, bool loadOnUse)
+{
+  //NOTE: This is super-experimental
+  //0 = "normal" sound
+  //!loadOnUse is for "preload", and might work?
+  return sound_add(fName, 0, !loadOnUse);
+}
+
+
 
 }
 
