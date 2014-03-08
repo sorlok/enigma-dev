@@ -19,6 +19,8 @@
 #ifndef ENIGMA_GM5COMPAT_PLACEBO__H
 #define ENIGMA_GM5COMPAT_PLACEBO__H
 
+#include "Universal_System/var4.h"
+
 
 ///This file contains functions which are no longer used by GM or ENIGMA,
 /// but which GM5 scripts may expect to see. All of them do absolutely
@@ -45,6 +47,12 @@ void sound_restore(int num);
 
 //General
 void discard_all();
+
+//TODO: These are not properly implemented yet.
+void set_graphics_mode(bool exclusive, int horizRes, int colorDepth, int freq, bool fullscreen, int winScale, int fullScale);
+void screen_gamma(double r, double g, double b);
+void sound_frequency(int index, double value);
+int sound_add(string fName, int buffers, bool useEffects, bool loadOnUse);
 
 }
 

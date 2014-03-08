@@ -18,10 +18,13 @@
 #include <list>
 
 #include "Universal_System/scalar.h"
+#include <string>
 
 
 namespace enigma_user
 {
+
+void print_line(const std::string& line);
 
 int draw_get_msaa_maxlevel();
 bool draw_get_msaa_supported();
