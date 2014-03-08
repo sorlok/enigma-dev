@@ -87,7 +87,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));}
+	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));  if (timeline_running && timeline_speed!=0) { enigma::advance_curr_timeline(timeline_position, timeline_speed, timeline_index, timeline_loop); } }
 
 alarm: 2
 	Group: Alarm
@@ -353,7 +353,7 @@ endstep: 3
 	Name: End Step
 	Mode: Special
 	Case: 2
-
+	Constant: { if (timeline_running && timeline_loop && timeline_speed!=0) enigma::loop_curr_timeline(timeline_position, timeline_speed, timeline_index); }
 
 particlesystemsupdate: 100000
 	Name: Particle Systems Update
