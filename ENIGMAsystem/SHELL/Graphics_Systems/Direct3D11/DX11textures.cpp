@@ -27,7 +27,7 @@ using std::string;
 #include "Graphics_Systems/graphics_mandatory.h"
 
 
-vector<TextureStruct*> textureStructs(0);
+map<int, TextureStruct*> textureStructs;
 
 namespace enigma_user {
   extern int room_width, room_height;

@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <set>
 #include <stdio.h>
 #include "Direct3D9Headers.h"
 #include "Bridges/General/DX9Context.h"
@@ -26,7 +27,13 @@
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
-vector<TextureStruct*> textureStructs(0);
+map<int, TextureStruct*> textureStructs;
+
+namespace {
+///IDs reclaimed for use by TextureStructs. 
+///If empty, the next-largest ID will be assigned.
+std::set<int> free_tex_ids;
+}
 
 namespace enigma_user {
   extern int room_width, room_height;
@@ -36,7 +43,8 @@ namespace enigma {
 }
 
 LPDIRECT3DTEXTURE9 get_texture(int texid) {
-  return (size_t(texid) >= textureStructs.size() || texid < 0) ? NULL : textureStructs[texid]->gTexture;
+  map<int, TextureStruct*>::const_iterator it = textureStructs.find(texid);
+  return it==textureStructs.end() ? NULL : it->second->gTexture;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -46,6 +54,15 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	x =  ((x >> 4) + x) & 0x0f0f0f0f;
 	x += x >> 8;
 	return (x + (x >> 16)) & 63;
+}
+
+int reserve_texture_id() {
+  int texID = textureStructs.size();
+  if (!free_tex_ids.empty()) {
+    texID = *free_tex_ids.begin();
+    free_tex_ids.erase(texID);
+  }
+  return texID;
 }
 
 namespace enigma
@@ -68,8 +85,13 @@ namespace enigma
 	textureStruct->height = height;
 	textureStruct->fullwidth = fullwidth;
 	textureStruct->fullheight = fullheight;
-    textureStructs.push_back(textureStruct);
-    return textureStructs.size()-1;
+
+    //Choose an ID for it.
+    int texID = reserve_texture_id();
+
+    //Add it to the lookup
+    textureStructs[texID] = textureStruct;
+    return texID;
   }
 
   int graphics_duplicate_texture(int tex)
@@ -116,7 +138,8 @@ namespace enigma
 
   void graphics_delete_texture(int tex)
   {
-	 textureStructs.erase(textureStructs.begin() + tex);
+    textureStructs.erase(tex);
+    free_tex_ids.insert(tex);
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)

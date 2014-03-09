@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <set>
 #include <stdio.h>
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
@@ -30,7 +31,13 @@
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
-vector<TextureStruct*> textureStructs(0);
+map<int, TextureStruct*> textureStructs;
+
+namespace {
+///IDs reclaimed for use by TextureStructs. 
+///If empty, the next-largest ID will be assigned.
+std::set<int> free_tex_ids;
+}
 
 namespace enigma_user {
   extern int room_width, room_height;
@@ -64,11 +71,8 @@ TextureStruct::~TextureStruct()
 
 unsigned get_texture(int texid)
 {
-	if (texid < 0 || texid >= textureStructs.size()) {
-		return 0;
-	} else {
-		return textureStructs[texid]->gltex;
-	}
+	map<int, TextureStruct*>::const_iterator it = textureStructs.find(texid);
+	return it==textureStructs.end() ? 0 : it->second->gltex;
 }
 
 namespace enigma
@@ -90,8 +94,17 @@ namespace enigma
 	textureStruct->height = height;
 	textureStruct->fullwidth = fullwidth;
 	textureStruct->fullheight = fullheight;
-    textureStructs.push_back(textureStruct);
-    return textureStructs.size()-1;
+
+    //Choose an ID for it.
+    int texID = textureStructs.size();
+    if (!free_tex_ids.empty()) {
+      texID = *free_tex_ids.begin();
+      free_tex_ids.erase(texID);
+    }
+
+    //Add it to the lookup
+    textureStructs[texID] = textureStruct;
+    return texID;
   }
 
   int graphics_duplicate_texture(int tex)
@@ -151,7 +164,8 @@ namespace enigma
   void graphics_delete_texture(int tex)
   {
     glDeleteTextures(1, &textureStructs[tex]->gltex);
-    textureStructs.erase(textureStructs.begin() + tex);
+    textureStructs.erase(tex);
+    free_tex_ids.insert(tex);
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
@@ -181,10 +195,10 @@ void texture_set_enabled(bool enable)
 void texture_set_interpolation(int enable)
 {
   enigma::interpolate_textures = enable;
-  for (unsigned i = 0; i < textureStructs.size(); i++)
+  for (map<int, TextureStruct*>::iterator it=textureStructs.begin(); it!=textureStructs.end(); it++)
   {
-	if (textureStructs[i]->isFont) { continue; }
-    oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
+	if (it->second->isFont) { continue; }
+    oglmgr->BindTexture(GL_TEXTURE_2D, it->second->gltex);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
   }
@@ -238,8 +252,9 @@ void texture_reset() {
 
 void texture_set_repeat(bool repeat)
 {
-  for (unsigned i = 0; i < textureStructs.size(); i++) {
-    glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
+  for (map<int, TextureStruct*>::iterator it=textureStructs.begin(); it!=textureStructs.end(); it++)
+  {
+    glBindTexture(GL_TEXTURE_2D, it->second->gltex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
