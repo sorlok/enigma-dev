@@ -40,17 +40,24 @@ using namespace std;
 #include "compiler/event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
-int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal)
+
+int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal, const std::set<std::string>& script_names)
 {
   // Dump our list of dot-accessed locals
   dot_accessed_locals.clear();
-  
+
   // Give all objects and events a second pass
   for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
   {
     parsed_object *oto = it->second;
+std::cout <<"************************\n";
+std::cout <<"SECONDARY PARSE BEGIN: " <<oto->name <<"\n";
+std::cout <<"************************\n";
     for (unsigned iit = 0; iit < oto->events.size; iit++)
-      parser_secondary(oto->events[iit].code,oto->events[iit].synt,EGMglobal,oto,&oto->events[iit]);
+      parser_secondary(oto->events[iit].code,oto->events[iit].synt,EGMglobal,oto,&oto->events[iit], script_names);
+std::cout <<"************************\n";
+std::cout <<"SECONDARY PARSE END" <<"\n";
+std::cout <<"************************\n";
   }
   
   // Give all scripts a second pass
