@@ -217,6 +217,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
   //Done with scripts and timelines.
 
 
+
   edbg << es->gmObjectCount << " Objects:\n";
   for (int i = 0; i < es->gmObjectCount; i++)
   {
@@ -307,6 +308,8 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       }
     }
   }
+
+
   
   //Next we link the scripts into the objects.
   edbg << "\"Linking\" scripts into the objects..." << flushl;
@@ -324,8 +327,10 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
     {
       map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //If we've got ourselves a script
+      if (subscr != scr_lookup.end()) { //If we've got ourselves a script 
+
         t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+		}
     }
   }
 
@@ -356,6 +361,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       }
     }
   }
+
   edbg << "\"Link\" complete." << flushl;
   
   // Sort through object calls finding max script arg counts
