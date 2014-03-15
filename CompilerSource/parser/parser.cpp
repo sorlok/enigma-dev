@@ -170,6 +170,9 @@ string parser_main(string code, parsed_event* pev)
   //Initialize us a spot in the global scope
   initscope("script scope");
 
+
+
+
   if (pev) {
     pev->strc = 0; //Number of strings in this code
     parser_ready_input(code,synt,pev->strc,pev->strs);
@@ -181,15 +184,21 @@ string parser_main(string code, parsed_event* pev)
     parser_ready_input(code,synt,strct,strst);
   }
 
+
+
   parser_reinterpret(code,synt);
 
+
+
   parser_add_semicolons(code,synt);
+
 
   //cout << synt << endl;
   //cout << code << endl;
 
   if (pev) { cout << "collecting variables..."; fflush(stdout);
     collect_variables(current_language, code,synt,pev); cout << " done>"; fflush(stdout);
+
   }
 
   return code;
@@ -295,10 +304,14 @@ int make_hash(const lexpair& lp, parsed_event* pev) {
   return r;
 }
 
-int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj,parsed_event* pev)
+int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj,parsed_event* pev, const std::set<std::string>& script_names)
 {
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
+
+
+std::cout <<"\nCode before: ###" <<code <<"###\n";
+std::cout <<"\nSynt before: ###" <<synt <<"###\n";
 
   int slev = 0;
   darray<localscope*> sstack;
@@ -408,6 +421,95 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     }
     else switch (synt[pos])
     {
+      case 's': {
+        pt nextPos = pos;
+        while (synt[++pos] == 's'); //Figure out what we're dealing with.
+        string ctrlType = code.substr(nextPos, pos-nextPos);
+        nextPos = pos - 1;
+
+        //Some functions inside "with" need to call the global version, not the object-local one.
+        if (ctrlType == "with") {
+          //This does not apply for with(self)
+          int paren = 0;
+          std::string withItem;
+          do {
+            char c = synt[pos];
+            if (c == 'n') {
+              pt oldPos = pos;
+              while (synt[++pos] == 'n');
+              withItem = code.substr(oldPos, pos-oldPos);
+            } else {
+              if (c == '(') { paren++; }
+              else if (c == ')') { paren--; }
+              pos++;
+            }
+          } while (paren>0);
+
+          //with(something_besides_self) means no object-local. Modify all function calls.
+          //NOTE: Really weird bracketing may throw this function off, but I suspect that's true of other code here as well.
+          if (withItem!="self") {
+            int singleLineScope = 1; //How many scopes will a single line (;) close?
+
+            //The first character matters somewhat.
+            if (synt[pos] == '{') {
+              singleLineScope = 0;
+              pos++;
+            }
+
+            for (int scope=1; scope>0; pos++) {
+              char c = synt[pos];
+              if (c=='n') {
+                //Match the name
+                pt oldPos = pos;
+                while (synt[++pos] == 'n');
+                string funcName = code.substr(oldPos, pos-oldPos);
+
+                //Are we calling a function?
+                if (synt[pos]=='(') {
+                  //Are we calling a valid script?
+                  if (script_names.find(funcName)!=script_names.end()) {
+                    //This needs to be globally scoped.
+                    code.insert(oldPos, "::");
+                    synt.insert(oldPos, "XX"); //TODO: I have no idea what syntax to use here.
+                    pos += 2;
+                  }
+                }
+              } else if (c=='s') { //These can create single-line scope.
+                //Skip the name
+                pt oldPos = pos;
+                while (synt[++pos] == 's');
+                string temp = code.substr(oldPos, pos-oldPos);
+                if (temp=="with") { std::cout <<"ERROR: with inside with can't be handled yet\n"; scope=0; }
+
+                //The next character determines how much scope we are searching for.
+                scope++;
+                if (synt[pos]=='{') {
+                  singleLineScope++;
+                  pos++;
+                } else {
+                  singleLineScope = 1;
+                }
+              } else if (c==';') { //This can sometimes close a level of scope if it's what we're waiting for.
+                if (singleLineScope>0) {
+                  scope -= singleLineScope;
+                  singleLineScope = 0;
+                }
+              } else if (c=='{') {
+                singleLineScope = 0;
+                scope++;
+              } else if (c=='}') {
+                scope--;
+              }
+            }
+          }
+        }
+
+        //Reset; we still need to scan this normally
+        pos = nextPos;
+
+        break;
+      }
+
       case '*':
         if (inbrack or deceq or !indecl)
           goto Ass;
@@ -703,6 +805,9 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       }
     }
   }
+
+std::cout <<"\nCode after: ###" <<code <<"###\n";
+std::cout <<"\nSynt after: ###" <<synt <<"###\n";
 
   while (slev) delete sstack[slev--];
   delete sstack[0];

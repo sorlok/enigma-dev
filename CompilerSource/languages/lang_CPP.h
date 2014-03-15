@@ -42,7 +42,7 @@ struct lang_CPP: language_adapter {
 
   // IDE_EDITABLEs added before compile
   int compile_parseAndLink(EnigmaStruct*,parsed_script*[]);
-  int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*);
+  int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*, const std::set<std::string>&);
   int compile_writeGlobals(EnigmaStruct*,parsed_object*);
   int compile_writeObjectData(EnigmaStruct*,parsed_object*);
   int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);
