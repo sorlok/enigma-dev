@@ -66,10 +66,13 @@ int surface_create(int width, int height)
 	enigma::Surface* surface = new enigma::Surface();	 
 	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;
-    textureStructs.push_back(gmTexture);
+
+	//Choose an ID for it, add it to the lookup
+	int texID = reserve_texture_id();
+	textureStructs[texID] = gmTexture;
 	//d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
 	texture->GetSurfaceLevel(0,&surface->surf);
-    surface->tex = textureStructs.size() - 1;
+	surface->tex = texID;
 	surface->width = width; surface->height = height;
 	enigma::Surfaces.push_back(surface);
 	return enigma::Surfaces.size() - 1;
@@ -82,9 +85,12 @@ int surface_create_msaa(int width, int height, int levels)
 	enigma::Surface* surface = new enigma::Surface();	 
 	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;
-    textureStructs.push_back(gmTexture);
+
+	//Choose an ID for it, add it to the lookup
+	int texID = reserve_texture_id();
+	textureStructs[texID] = gmTexture;
 	d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-    surface->tex = textureStructs.size() - 1;
+	surface->tex = texID;
 	surface->width = width; surface->height = height;
 	enigma::Surfaces.push_back(surface);
 	return enigma::Surfaces.size() - 1;
