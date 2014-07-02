@@ -18,6 +18,7 @@
 
 
 #include "GM5Placebo.h"
+#include "Audio_Systems/General/ASbasic.h"
 
 
 namespace enigma_user
