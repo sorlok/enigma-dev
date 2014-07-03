@@ -18,6 +18,22 @@
 namespace enigma_user
 {
 
+//A "filestr" is a string that converts "\" to "/" on Linux 
+// (and optionally Windows). It is used to allow Windows-separated filenames on Linux.
+class filestr {
+public:
+  //A one-argument constructor allows the class to silently convert strings into filstrs
+  filestr(const char* fname);
+
+  //Use to retrieve the underlying c_str(); the only thing that filestrs are used for (usually).
+  const char* c_str() const { return data.c_str(); }
+
+private:
+  std::string data;
+};
+
+
+
 // File attribute constants
 enum {
   fa_readonly  = 1,
@@ -32,7 +48,7 @@ long long file_size(std::string fname);
 time_t file_access_time(std::string fname);
 time_t file_modified_time(std::string fname);
 
-int file_exists(std::string fname);
+int file_exists(const filestr& fname);
 int file_delete(std::string fname);
 int file_rename(std::string oldname,std::string newname);
 int file_copy(std::string fname,std::string newname);

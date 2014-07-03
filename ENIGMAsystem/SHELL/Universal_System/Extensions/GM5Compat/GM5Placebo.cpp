@@ -20,6 +20,8 @@
 #include "GM5Placebo.h"
 #include "Audio_Systems/General/ASbasic.h"
 
+#include "Platforms/General/PFfilemanip.h"
+
 
 namespace enigma_user
 {
@@ -64,12 +66,12 @@ void sound_frequency(int index, double value)
 {
 }
 
-int sound_add(string fName, int buffers, bool useEffects, bool loadOnUse)
+int sound_add(const filestr& fname, int buffers, bool useEffects, bool loadOnUse)
 {
   //NOTE: This is super-experimental
   //0 = "normal" sound
   //!loadOnUse is for "preload", and might work?
-  return sound_add(fName, 0, !loadOnUse);
+  return sound_add(fname, 0, !loadOnUse);
 }
 
 
