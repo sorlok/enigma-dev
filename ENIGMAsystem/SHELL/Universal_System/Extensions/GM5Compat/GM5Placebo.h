@@ -31,6 +31,8 @@
 namespace enigma_user
 {
 
+class filestr;
+
 //Sprites
 void sprite_discard(int num);
 void sprite_restore(int num);
@@ -49,6 +51,8 @@ void discard_all();
 //TODO: These are not properly implemented yet.
 void set_graphics_mode(bool exclusive, int horizRes, int colorDepth, int freq, bool fullscreen, int winScale, int fullScale);
 void screen_gamma(double r, double g, double b);
+void sound_frequency(int index, double value);
+int sound_add(const filestr& fname, int buffers, bool useEffects, bool loadOnUse);
 
 }
 

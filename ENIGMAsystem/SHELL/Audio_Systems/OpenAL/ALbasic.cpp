@@ -30,6 +30,8 @@ using std::string;
 #include "SoundEmitter.h"
 #include "ALsystem.h"
 
+#include "Platforms/General/PFfilemanip.h"
+
 #ifdef __APPLE__
 #include "../../../additional/alure/include/AL/alure.h"
 #else
@@ -271,7 +273,7 @@ extern void show_message(string);
 namespace enigma_user
 {
 
-int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
+int sound_add(const filestr& fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
 {
   // Open sound
   FILE *afile = fopen(fname.c_str(),"rb");
