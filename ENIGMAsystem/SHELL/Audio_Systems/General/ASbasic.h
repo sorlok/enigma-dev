@@ -25,6 +25,8 @@ using std::string;
 namespace enigma_user
 {
 
+class filestr; //From PFfilemanip
+
 bool sound_exists(int sound);
 bool sound_play(int sound);
 bool sound_loop(int sound);
@@ -48,7 +50,7 @@ bool sound_ispaused(int sound);
 
 void action_sound(int snd, bool loop);
 
-int sound_add(string fname, int kind, bool preload);
+int sound_add(const filestr& fname, int kind, bool preload);
 bool sound_replace(int sound, string fname, int kind, bool preload);
 inline bool action_replace_sound(int sound, string fname)
 {

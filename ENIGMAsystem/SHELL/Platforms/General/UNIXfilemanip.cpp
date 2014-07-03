@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include <algorithm>
 #include <string>
 #include "PFfilemanip.h"
 using namespace std;
@@ -29,7 +30,11 @@ using namespace std;
 namespace enigma_user
 {
 
-int file_exists(string fname)
+filestr::filestr(const char* fname) : data(fname) {
+  std::replace(data.begin(), data.end(), '\\', '/');
+}
+
+int file_exists(const filestr& fname)
 {
   struct stat st;
   return (stat(fname.c_str(),&st) == 0) and !(S_ISDIR(st.st_mode));
