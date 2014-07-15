@@ -318,7 +318,32 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     }
   }
 
-
+  //Next we link the timelines into the objects that might call them.
+  edbg << "\"Linking\" timelines into the objects..." << flushl;
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  {
+    parsed_object* t = i->second;
+    for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
+    {
+      map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+      if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+        //Iterate through its moments:
+        for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+          t->copy_calls_from((*momit)->obj);
+        }
+      }
+    }
+    for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
+    {
+      map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+      if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+        //Iterate through its moments:
+        for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+          t->copy_from((*momit)->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+        }
+      }
+    }
+  }
 
   edbg << "\"Link\" complete." << flushl;
   
