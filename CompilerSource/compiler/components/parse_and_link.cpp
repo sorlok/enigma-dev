@@ -311,8 +311,8 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
 
   
-  //Next we link the scripts into the objects.
-  edbg << "\"Linking\" scripts into the objects..." << flushl;
+  //Next we link the scripts/timelines into the objects.
+  edbg << "\"Linking\" scripts and timelines into the objects..." << flushl;
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
   {
     parsed_object* t = i->second;
@@ -324,21 +324,6 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         t->copy_tlines_from(subscr->second->obj);
       }
     }
-    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
-    {
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) { //If we've got ourselves a script 
-
-        t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
-		}
-    }
-  }
-
-  //Next we link the timelines into the objects that might call them.
-  edbg << "\"Linking\" timelines into the objects..." << flushl;
-  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-  {
-    parsed_object* t = i->second;
     for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
     {
       map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
@@ -349,6 +334,16 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
           t->copy_tlines_from((*momit)->obj);
         }
       }
+    }
+
+
+    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
+    {
+      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+      if (subscr != scr_lookup.end()) { //If we've got ourselves a script 
+
+        t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+		}
     }
     for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
     {
@@ -361,6 +356,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       }
     }
   }
+
 
   edbg << "\"Link\" complete." << flushl;
   
