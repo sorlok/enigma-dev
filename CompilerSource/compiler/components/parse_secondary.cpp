@@ -60,17 +60,23 @@ std::cout <<"************************\n";
   }
   
   // Give all scripts a second pass
+std::cout <<"************************\n";
+std::cout <<"SECONDARY PARSE BEGIN: <all scripts>\n";
+std::cout <<"************************\n";
   for (int i = 0; i < scrcount; i++) {
-    parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj,&scripts[i]->pev);
+    parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj,&scripts[i]->pev, script_names);
     if (scripts[i]->pev_global)
-      parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj,scripts[i]->pev_global);
+      parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj,scripts[i]->pev_global, script_names);
   }
+std::cout <<"************************\n";
+std::cout <<"SECONDARY PARSE END" <<"\n";
+std::cout <<"************************\n";
 
   //Give all timelines a second pass
   for (int i=0; i<int(tlines.size()); i++) {
-    parser_secondary(tlines[i]->pev.code,tlines[i]->pev.synt,EGMglobal,&tlines[i]->obj,&tlines[i]->pev);
+    parser_secondary(tlines[i]->pev.code,tlines[i]->pev.synt,EGMglobal,&tlines[i]->obj,&tlines[i]->pev, script_names);
     if (tlines[i]->pev_global)
-      parser_secondary(tlines[i]->pev_global->code,tlines[i]->pev_global->synt,EGMglobal,&tlines[i]->obj,tlines[i]->pev_global);
+      parser_secondary(tlines[i]->pev_global->code,tlines[i]->pev_global->synt,EGMglobal,&tlines[i]->obj,tlines[i]->pev_global, script_names);
   }
   
   // Give all room creation codes a second pass
@@ -79,11 +85,11 @@ std::cout <<"************************\n";
     parsed_object *oto; // The object into which we will dump locals
     oto = it->second; // Start by dumping into this room
     if (it->second->events.size)
-      parser_secondary(oto->events[0].code,oto->events[0].synt,EGMglobal,oto,&oto->events[0]);
+      parser_secondary(oto->events[0].code,oto->events[0].synt,EGMglobal,oto,&oto->events[0], script_names);
     for (map<int,parsed_room::parsed_icreatecode>::iterator ici = it->second->instance_create_codes.begin(); ici != it->second->instance_create_codes.end(); ici++)
     {
       oto = parsed_objects[ici->second.object_index];
-      parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe);
+      parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe, script_names);
     }
   }
   
