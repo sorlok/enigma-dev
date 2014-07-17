@@ -655,8 +655,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
       for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
       {
         map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-        if (subscr != scr_lookup.end() // If we've got ourselves a script
-        and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally)
+        if (subscr != scr_lookup.end()) // If we've got ourselves a script
+//        and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally)
         {
           const char* comma = "";
           wto << "variant enigma::OBJ_" << i->second->name << "::_SCR_" << it->first << "(";
