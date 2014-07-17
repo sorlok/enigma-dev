@@ -343,7 +343,7 @@ bool skip_paren(string& res, pt& pos, const string& code, const string& synt, ch
 } 
 
 
-int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj,parsed_event* pev, const std::set<std::string>& script_names)
+int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_object* obj,parsed_event* pev, const std::set<std::string>& script_names, const std::map<std::string, std::set<std::string> >& object_local_script_names)
 {
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
@@ -469,7 +469,6 @@ std::cout <<"\nSynt before: ###" <<synt <<"###\n";
 
         //Some functions inside "with" need to call the global version, not the object-local one.
         if (ctrlType == "with") {
-std::cout <<"FOUND: with {\n";
           //This does not apply for with(self)
           std::string withItem;
           if (!skip_paren(withItem, pos, code, synt, 'n')) { //Slightly less unlikely.
@@ -488,7 +487,6 @@ std::cout <<"FOUND: with {\n";
               singleLineScope = 0;
               pos++;
             }
-std::cout <<"  FOUND: with self; single-line scope: " <<singleLineScope <<"\n";
 
             for (int scope=1; scope>0; pos++) {
               if (pos>=synt.size()) {
@@ -505,18 +503,31 @@ std::cout <<"  FOUND: with self; single-line scope: " <<singleLineScope <<"\n";
                   std::cout <<"ERROR: function-name match runs to end of code [1].\n";
                   break; 
                 }
-std::cout <<"  FOUND: name: " <<funcName <<"\n";
 
                 //Are we calling a function?
                 if (synt[pos]=='(') {
                   //Are we calling a valid script?
                   if (script_names.find(funcName)!=script_names.end()) {
+                    //Now this could be a locally-compiled script call. In which case we should call the locally-compiled script.
+                    bool localObj = false;
+                    const std::map<std::string, std::set<std::string> >::const_iterator tempIt = object_local_script_names.find(withItem);
+                    if (tempIt!=object_local_script_names.end()) {
+                      if (tempIt->second.find(funcName)!=tempIt->second.end()) {
+                        localObj = true;
+                      }
+                    }
+
+
                     //This needs to be globally scoped, unless we've done this already (with inside with)
-                    if (code[oldPos-1] != ':') { //TODO: We could presumably fix nested "with (x) { with(self) {}}" here, if it occurs often in practice.
-std::cout <<"  name tagged with \"::\"\n";
-                      code.insert(oldPos, "::");
-                      synt.insert(oldPos, "XX"); //TODO: I have no idea what syntax to use here.
-                      pos += 2;
+                    if ((code[oldPos-2]==':' && code[oldPos-1]==':') || (code[oldPos-2]=='-' && code[oldPos-1]=='>')) {
+                    } else { //TODO: We could presumably fix nested "with (x) { with(self) {}}" here, if it occurs often in practice.
+                      std::string withText = "::";
+                      if (localObj) {
+                        withText = std::string("((enigma::OBJ_") + withItem + "*)enigma::instance_event_iterator->inst)->";
+                      }
+                      code.insert(oldPos, withText);
+                      synt.insert(oldPos, std::string(withText.size(), 'X')); //TODO: I have no idea what syntax to use here.
+                      pos += withText.size();
                     }
                   }
                 }
@@ -532,8 +543,6 @@ std::cout <<"  name tagged with \"::\"\n";
                   std::cout <<"ERROR: Parentheses don't match on \"" <<ctrlType <<"\" statement.\n";
                   break;
                 }
-
-std::cout <<"  FOUND: control: " <<ctrlType <<" (" <<innerName <<")\n";
 
                 //If the control type is "with", we can only proceed if it doesn't use "self"
                 if (ctrlType=="with") { 
@@ -553,7 +562,6 @@ std::cout <<"  FOUND: control: " <<ctrlType <<" (" <<innerName <<")\n";
                 }
               } else if (c==';') { //This can sometimes close a level of scope if it's what we're waiting for.
                 if (singleLineScope>0) {
-std::cout <<"  FOUND: semicolon; closing " <<singleLineScope <<" scopes\n";
                   scope -= singleLineScope;
                   singleLineScope = 0;
                 }
@@ -568,7 +576,6 @@ std::cout <<"  FOUND: semicolon; closing " <<singleLineScope <<" scopes\n";
               }
             }
           }
-std::cout <<"} end FOUND\n";
         }
 
         //Reset; we still need to scan this normally

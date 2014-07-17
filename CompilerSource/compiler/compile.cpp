@@ -570,7 +570,19 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   for (int i = 0; i < es->scriptCount; i++)
     script_names.insert(es->scripts[i].name);
 
-  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal, script_names);
+  //Parser also needs knowledge of which objects have localized which scripts.
+  std::map<std::string, std::set<std::string> > object_local_script_names;
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
+    parsed_object* t = i->second;
+    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) { //For each function called by each script
+      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+      if (subscr != scr_lookup.end()) { //If we've got ourselves a script 
+        object_local_script_names[i->second->name].insert(it->first);
+		}
+    }
+  }
+
+  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal, script_names, object_local_script_names);
 
   edbg << "Writing object data" << flushl;
   res = current_language->compile_writeObjectData(es,&EGMglobal,mode);
