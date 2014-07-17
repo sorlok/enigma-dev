@@ -131,8 +131,14 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
         if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
           for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
-            curscript->obj.copy_calls_from((*momit)->obj);
-            curscript->obj.copy_tlines_from((*momit)->obj);
+            for (parsed_object::funcit it2 = (*momit)->obj.funcs.begin(); it2 != (*momit)->obj.funcs.end(); it2++) //For each function called by each timeline moment
+            {
+              map<string,parsed_script*>::iterator subscr = scr_lookup.find(it2->first); //Check if it's a script
+              if (subscr != scr_lookup.end()) { //At this point, what we have is this:     for each script called by curscript
+                curscript->obj.copy_calls_from(subscr->second->obj);
+                curscript->obj.copy_tlines_from(subscr->second->obj);
+              }
+            }
           }
         }
       }
@@ -157,8 +163,14 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
           map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
           if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
             for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
-              curscript->obj.copy_calls_from((*momit)->obj);
-              curscript->obj.copy_tlines_from((*momit)->obj);
+              for (parsed_object::funcit it2 = (*momit)->obj.funcs.begin(); it2 != (*momit)->obj.funcs.end(); it2++) //For each function called by each timeline moment
+              {
+                map<string,parsed_script*>::iterator subscr = scr_lookup.find(it2->first); //Check if it's a script
+                if (subscr != scr_lookup.end()) { //At this point, what we have is this:     for each script called by curscript
+                  curscript->obj.copy_calls_from(subscr->second->obj);
+                  curscript->obj.copy_tlines_from(subscr->second->obj);
+                }
+              }
             }
           }
         }
