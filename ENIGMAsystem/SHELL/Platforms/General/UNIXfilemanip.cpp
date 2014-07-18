@@ -33,6 +33,9 @@ namespace enigma_user
 filestr::filestr(const char* fname) : data(fname) {
   std::replace(data.begin(), data.end(), '\\', '/');
 }
+filestr::filestr(const std::string& fname) : data(fname) {
+  std::replace(data.begin(), data.end(), '\\', '/');
+}
 
 int file_exists(const filestr& fname)
 {

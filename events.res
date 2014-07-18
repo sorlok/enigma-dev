@@ -437,7 +437,7 @@ endstep: 3
 	Name: End Step
 	Mode: Special
 	Case: 2
-	Constant: { if (image_single >= 0) image_index = image_single; if (timeline_running && timeline_loop && timeline_speed!=0) enigma::loop_curr_timeline(timeline_position, timeline_speed, timeline_index); }
+	Constant: { if (image_single >= 0) image_index = image_single; if (timeline_running && timeline_loop && timeline_speed!=0) loop_curr_timeline(); }
 
 
 particlesystemsupdate: 100000
