@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <string>
+
 namespace enigma_user
 {
 
@@ -24,6 +26,7 @@ class filestr {
 public:
   //A one-argument constructor allows the class to silently convert strings into filstrs
   filestr(const char* fname);
+  filestr(const std::string& fname);
 
   //Use to retrieve the underlying c_str(); the only thing that filestrs are used for (usually).
   const char* c_str() const { return data.c_str(); }

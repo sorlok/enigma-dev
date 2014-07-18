@@ -28,7 +28,7 @@ namespace enigma_user
 //buffers states how many buffers to use to store the sound. If it's set to, e.g., 5, then the sound can only be played 5 times simultaneously. We ignore it.
 //useEffects allows sound_volume, sound_pan, and sound_frequency to be used. We assume it is always on.
 //loadOnUse means whether the sound "should be stored in internal memory". We should (I think) assume it is always on.
-int sound_add(string fName, int buffers, bool useEffects, bool loadOnUse)
+int sound_add(const filestr& fName, int buffers, bool useEffects, bool loadOnUse)
 {
   //We just dispatch to the normal sound_add function. 0="normal" sound.
   return sound_add(fName, 0, true);
