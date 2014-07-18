@@ -423,7 +423,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         synt.replace(ebp, exp.length() + 1 + member.length(), repsyn);
         pos = ebp + repstr.length() - 1;
       }
-      cout << "New level: " << level << endl << "code from here: " << code.substr(pos) << endl;
+//      cout << "New level: " << level << endl << "code from here: " << code.substr(pos) << endl;
       continue;
     }
     else if (synt[pos] == '[' and (!indecl or deceq))
