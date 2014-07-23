@@ -64,6 +64,18 @@ namespace enigma
       return *this;
     }
 
+    template <typename T>
+    bool operator>=(const T& value) const { return this->value >= value; }
+    template <typename T>
+    bool operator>(const T& value) const { return this->value > value; }
+    template <typename T>
+    bool operator<=(const T& value) const { return this->value <= value; }
+    template <typename T>
+    bool operator<(const T& value) const { return this->value < value; }
+    template <typename T>
+    bool operator==(const T& value) const { return this->value == value; }
+
+
     void incr(gs_scalar speed, int sprite_num) { //Called in the event loop.
       value = fmod((speed < 0)?(sprite_num + value - fmod(abs(speed),sprite_num)):(value + speed), sprite_num);
     }
@@ -77,7 +89,7 @@ namespace enigma
       return manual;
     }
 
-    operator gs_scalar() {
+    operator gs_scalar() const {
       return value;
     }
 
@@ -102,6 +114,20 @@ namespace enigma
 
       //Now, set the value.
       this->value = value;
+      return *this;
+    }
+
+    ImageSingle& operator=(const ImageIndex& value) {
+      //First, handle the linked image_index.
+      if (value>=0) {
+        if (img_ind.isManual()) { oldImgIndex = img_ind; } //Save if it was manually set.
+        img_ind.set(static_cast<gs_scalar>(value), false);
+      } else {
+        img_ind.set(oldImgIndex, true);
+      }
+
+      //Now, set the value.
+      this->value = static_cast<gs_scalar>(value);
       return *this;
     }
 
@@ -146,6 +172,17 @@ namespace enigma
       this->value *= value;
       return *this;
     }
+
+    template <typename T>
+    bool operator>=(const T& value) const { return this->value >= value; }
+    template <typename T>
+    bool operator>(const T& value) const { return this->value > value; }
+    template <typename T>
+    bool operator<=(const T& value) const { return this->value <= value; }
+    template <typename T>
+    bool operator<(const T& value) const { return this->value < value; }
+    template <typename T>
+    bool operator==(const T& value) const { return this->value == value; }
 
    operator int() {
       return value;
