@@ -87,7 +87,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));}
+	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1 && image_single < 0) image_index.incr(image_speed, sprite_get_number(sprite_index)); }
 
 
 alarm: 2
@@ -437,7 +437,7 @@ endstep: 3
 	Name: End Step
 	Mode: Special
 	Case: 2
-	Constant: { if (image_single >= 0) image_index = image_single; if (timeline_running && timeline_loop && timeline_speed!=0) loop_curr_timeline(); }
+	Constant: { if (timeline_running && timeline_loop && timeline_speed!=0) loop_curr_timeline(); }
 
 
 particlesystemsupdate: 100000

@@ -69,7 +69,7 @@ namespace enigma
       if (perf) newinst->myevent_create();
       newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
       newinst->xstart=xstart; newinst->ystart=ystart;
-      newinst->image_index=image_index; newinst->image_speed=image_speed; newinst->image_single=image_single;
+      newinst->image_single=image_single; newinst->image_index=image_index; newinst->image_speed=image_speed; 
       newinst->visible=visible; newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
       newinst->hspeed=hspeed; newinst->vspeed=vspeed;
   }
