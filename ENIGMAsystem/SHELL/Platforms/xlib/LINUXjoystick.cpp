@@ -136,7 +136,8 @@ namespace enigma_user
     else
        delete enigma::joysticks[id];
     
-    char sps[32]; sprintf(sps,"/dev/input/js%d",id);
+    char sps[32] = {0};
+    sprintf(sps,"/dev/input/js%d",id);
     string devn(sps);
     int device = open(devn.c_str(), O_RDONLY|O_NONBLOCK);
     if (device == -1)
@@ -147,7 +148,7 @@ namespace enigma_user
     if (ioctl(device, JSIOCGAXES, &ac) or ioctl(device, JSIOCGBUTTONS, &bc))
       return (close(device), false);
     
-    char name[256]; name[0] = 0;
+    char name[256] = {0};
     if (ioctl(device, JSIOCGNAME(256), name) > 0)
       devn = name;
     printf("Joystick name: %s\n",name);

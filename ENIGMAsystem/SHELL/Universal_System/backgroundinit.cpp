@@ -33,61 +33,46 @@ namespace enigma
 {
   void exe_loadbackgrounds(FILE *exe)
   {
-    int nullhere;
-	  unsigned bkgid, width, height,transparent,smoothEdges,preload,useAsTileset,tileWidth,tileHeight,hOffset,vOffset,hSep,vSep;
+    int nullhere=0;
+    unsigned bkgid=0, width=0, height=0,transparent=0,smoothEdges=0,preload=0,useAsTileset=0,tileWidth=0,tileHeight=0,hOffset=0,vOffset=0,hSep=0,vSep=0;
 
     if (!fread(&nullhere,4,1,exe) or nullhere != *(int*)"BKG ")
       return;
 
     // Determine how many backgrounds we have
-    int bkgcount;
+    int bkgcount=0;
     if (!fread(&bkgcount,4,1,exe))
       return;
 
 
 	  // Fetch the highest ID we will be using
-	  int bkg_highid;
+	  int bkg_highid=0;
 	  if (!fread(&bkg_highid,4,1,exe))
 	    return;
 
 	  for (int i = 0; i < bkgcount; i++)
 	  {
-		  int unpacked;
+		  int unpacked=0;
 		  if (!fread(&bkgid, 4,1,exe)) return;
 		  if (!fread(&width, 4,1,exe)) return;
-		  printf("width: %d", width);
 		  if (!fread(&height,4,1,exe)) return;
-		  printf("height: %d", height);
-
 		  if (!fread(&transparent,4,1,exe)) return;
-		  printf("transparent: %d", transparent);
 		  if (!fread(&smoothEdges,4,1,exe)) return;
-		  printf("smoothEdges: %d", smoothEdges);
 		  if (!fread(&preload,4,1,exe)) return;
-		  printf("preload: %d", preload);
 		  if (!fread(&useAsTileset,4,1,exe)) return;
-		  printf("useAsTileset: %d", useAsTileset);
 		  if (!fread(&tileWidth,4,1,exe)) return;
-		  printf("tileWidth: %d", tileWidth);
 		  if (!fread(&tileHeight,4,1,exe)) return;
-		  printf("tileHeight: %d", tileHeight);
 		  if (!fread(&hOffset,4,1,exe)) return;
-		  printf("hOffset: %d", hOffset);
 		  if (!fread(&vOffset,4,1,exe)) return;
-		  printf("vOffset: %d", vOffset);
 		  if (!fread(&hSep,4,1,exe)) return;
-		  printf("hSep: %d", hSep);
 		  if (!fread(&vSep,4,1,exe)) return;
-		  printf("vSep: %d", vSep);
-
 
 		  //need to add: transparent, smooth, preload, tileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep
 
 		  unpacked = width*height*4;
 
-		  unsigned int size;
+		  unsigned int size=0;
 		  if (!fread(&size,4,1,exe)){};
-		  printf("Alloc size: %d", size);
 
 		  unsigned char* cpixels=new unsigned char[size+1];
 		  if (!cpixels)
@@ -108,7 +93,6 @@ namespace enigma
 		  }
 		  delete[] cpixels;
 
-		  printf("Adding background: %d\n\n", i);
 		  background_new(bkgid, width, height, pixels, false, false, true, false, 32, 32, 0, 0, 1,1);
 
 		  delete[] pixels;

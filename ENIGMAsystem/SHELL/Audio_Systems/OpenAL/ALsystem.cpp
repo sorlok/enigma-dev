@@ -209,7 +209,9 @@ namespace enigma {
           for (size_t j = 0; j < sound_channels.size(); j++) {
             alureStopSource(sound_channels[j]->source, true);
             alDeleteSources(1, &sound_channels[j]->source);
+            delete sound_channels[j];
           }
+          sound_channels.clear();
           break;
   
         case LOADSTATE_INDICATED:

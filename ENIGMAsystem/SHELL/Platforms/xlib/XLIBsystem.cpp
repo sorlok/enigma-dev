@@ -23,23 +23,23 @@ namespace enigma {
 namespace enigma_user {
 
 string os_get_config() {
-
+  return "";
 }
 
 int os_get_info() {
-
+  return -1;
 }
 
 string os_get_language() {
-
+  return "";
 }
 
 string os_get_region() {
-
+  return "";
 }
 
 bool os_is_network_connected() {
-
+  return false;
 }
 
 bool os_is_paused() {

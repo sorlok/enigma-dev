@@ -53,20 +53,20 @@ OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 # options #
 ###########
 
-CXX := g++
-CC := gcc
+CXX := clang++
+CC := clang
 DEPENDENCIES :=
 
 ifeq ($(GMODE), Debug)
 	CXXFLAGS += -Wall -g -DDEBUG_MODE
 	CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
-	CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
-	LDFLAGS += -flto -s -O3
+	CXXFLAGS += -Wall -g -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
+	CFLAGS += -Wall -g -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
+	LDFLAGS += -flto -g -s -O3
 else
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
-	CFLAGS += -Wall -s -O3 -fno-exceptions
+	CXXFLAGS += -Wall -g -s -O3 -fno-rtti -fno-exceptions
+	CFLAGS += -Wall -g -s -O3 -fno-exceptions
 endif
 
 ifeq ($(PLATFORM), Win32)

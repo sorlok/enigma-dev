@@ -186,7 +186,7 @@ double distance_to_object(int object)
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
-    int left1, top1, right1, bottom1;
+    int left1=0, top1=0, right1=0, bottom1=0;
 
     get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
 
@@ -201,7 +201,7 @@ double distance_to_object(int object)
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
-        int left2, top2, right2, bottom2;
+        int left2=0, top2=0, right2=0, bottom2=0;
 
         get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
@@ -228,7 +228,7 @@ double distance_to_point(cs_scalar x, cs_scalar y)
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
-    int left1, top1, right1, bottom1;
+    int left1=0, top1=0, right1=0, bottom1=0;
 
     get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
 
@@ -267,7 +267,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
-    int left1, top1, right1, bottom1;
+    int left1=0, top1=0, right1=0, bottom1=0;
 
     get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x1, y1, xscale1, yscale1, ia1);
 
@@ -282,7 +282,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
-        int left2, top2, right2, bottom2;
+        int left2=0, top2=0, right2=0, bottom2=0;
 
         get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
 
@@ -550,7 +550,7 @@ void instance_deactivate_region_except(int exid, int rleft, int rtop, int rwidth
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
 
-        int left, top, right, bottom;
+        int left=0, top=0, right=0, bottom=0;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
@@ -574,7 +574,7 @@ void instance_deactivate_circle_except(int exid, int x, int y, int r, bool insid
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
 
-        int left, top, right, bottom;
+        int left=0, top=0, right=0, bottom=0;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
 
         const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||
@@ -623,26 +623,28 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool
       return;
     }
 
-    for (std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
-         iter != enigma::instance_deactivated_list.end();
-         ++iter) {
-
+    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
 
-        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
+            ++iter;
             continue;
+        }
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
 
-        int left, top, right, bottom;
+        int left=0, top=0, right=0, bottom=0;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
             inst->activate();
-            enigma::instance_deactivated_list.erase(iter);
+            enigma::instance_deactivated_list.erase(iter++);
+        } else {
+            ++iter;
         }
     }
 }
@@ -684,7 +686,7 @@ void instance_activate_circle(int x, int y, int r, bool inside)
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
 
-        int left, top, right, bottom;
+        int left=0, top=0, right=0, bottom=0;
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x1, y1, xscale, yscale, ia);
 
         const bool intersects = line_ellipse_intersects(r, r, left-x, top-y, bottom-y) ||

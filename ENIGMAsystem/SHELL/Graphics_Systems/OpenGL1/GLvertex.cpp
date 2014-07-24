@@ -59,11 +59,11 @@ VertexFormat* vertexFormat = 0;
 namespace enigma_user {
 
 int vertex_create_buffer() {
-
+  return -1;
 }
 
 int vertex_create_buffer_ext(unsigned size) {
-
+  return -1;
 }
 
 void vertex_delete_buffer(int buffer) {
