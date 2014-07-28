@@ -1,0 +1,11 @@
+%e-yaml
+---
+
+Name: SDL
+Identifier: sdl
+Represents: Linux
+Description: Run on any platform that supports SDL + OpenGL.
+Author: Seth N. Hetu
+
+Depends:
+	Build-Platforms: Linux
