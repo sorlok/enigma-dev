@@ -60,6 +60,7 @@ namespace enigma
 namespace sdl {
 SDL_Window* win = NULL;
 SDL_DisplayMode main_display;
+static SDL_Renderer* displayRenderer; //TODO: We might also want to maintain a SDL_RendererInfo about this renderer.
 }
 }
 
@@ -307,8 +308,8 @@ int main(int argc,char** argv)
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   //Create a Window.
-  win = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, win_width, win_height, SDL_WINDOW_OPENGL);
-  if (!win){
+  SDL_CreateWindowAndRenderer(win_width, win_height, SDL_WINDOW_OPENGL, &win, &displayRenderer);
+  if (!(win && displayRenderer)){
     std::cout <<"SDL_CreateWindow failed: " <<SDL_GetError() <<"\n";
     SDL_Quit();
     return -1;
