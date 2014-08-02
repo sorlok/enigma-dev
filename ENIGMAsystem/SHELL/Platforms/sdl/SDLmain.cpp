@@ -79,6 +79,18 @@ namespace enigma {
           case SDL_QUIT:
             return false;
 
+          case SDL_WINDOWEVENT:
+            switch (event.window.event) {
+              case SDL_WINDOWEVENT_FOCUS_GAINED:
+                enigma::gameWindowFocused = true;
+                pausedSteps = 0;
+                break;
+              case SDL_WINDOWEVENT_FOCUS_LOST:
+                enigma::gameWindowFocused = false;
+                break;
+            }
+            break;
+
           case SDL_KEYDOWN:
             if (event.key.keysym.sym&0xFF00) { //TODO: This was from Xlib. See if it still matters.
               actualKey = enigma_user::keyboard_get_map(event.key.keysym.sym&0xFF);
