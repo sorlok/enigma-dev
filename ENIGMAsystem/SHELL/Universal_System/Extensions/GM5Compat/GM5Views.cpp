@@ -16,8 +16,19 @@
 // with this code. If not, see <http://www.gnu.org/licenses/>
 //
 
-#include "GM5Placebo.h"
-#include "GM5Drawing.h"
-#include "GM5Sound.h"
+
 #include "GM5Views.h"
+
+
+namespace enigma_user
+{
+
+enigma::RvtBind2 view_width(view_wview, view_wport);
+enigma::RvtBind2 view_height(view_hview, view_hport);
+enigma::RvtBind view_x(view_xview);
+enigma::RvtBind view_y(view_yview);
+enigma::RvtBind3 view_left(view_xview, view_wview);
+enigma::RvtBind3 view_top(view_yview, view_hview);
+
+}
 
