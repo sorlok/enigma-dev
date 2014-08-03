@@ -21,8 +21,8 @@
 #include "Universal_System/scalar.h"
 #include "GLSamplerState.h"
 
-#include <vector>
-using std::vector;
+#include <map>
+using std::map;
 
 struct TextureStruct {
   enigma::SamplerState* sampler;
@@ -32,7 +32,7 @@ struct TextureStruct {
 	TextureStruct(unsigned gtex);
 	~TextureStruct();
 };
-extern vector<TextureStruct*> textureStructs;
+extern map<int, TextureStruct*> textureStructs;
 
 unsigned get_texture(int texid);
 

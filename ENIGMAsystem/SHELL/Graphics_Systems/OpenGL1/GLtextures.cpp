@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
-//using std::string;
+
 #include "../General/GStextures.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/backgroundstruct.h"
@@ -164,8 +164,8 @@ namespace enigma
   void graphics_delete_texture(int texid)
   {
     delete textureStructs[texid];
-    textureStructs.erase(tex);
-    free_tex_ids.insert(tex);
+    textureStructs.erase(texid);
+    free_tex_ids.insert(texid);
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
