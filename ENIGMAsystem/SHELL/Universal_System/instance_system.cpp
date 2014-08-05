@@ -48,6 +48,8 @@ extern  deque<int> instance_id; // TODO: Implement and move to enigma_user.
 
 namespace enigma
 {
+  std::map<unsigned int, object_basic*> room_starting_instances;
+
   inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL): inst(i), next(n), prev(p) {}
   objectid_base::objectid_base(): inst_iter(NULL,NULL,this), count(0) {}
   event_iter::event_iter(string n): inst_iter(NULL,NULL,this), name(n) {}
@@ -240,6 +242,21 @@ namespace enigma
 
     iliter a = instance_list.find(x);
     return a != instance_list.end() ? a->second : NULL;
+  }
+
+  iterator fetch_roominst_iter_by_id(int x)
+  {
+    if (x < 100000)
+      return iterator();
+
+    //Check if it's a deactivated instance first.
+    std::map<int,enigma::inst_iter*>::iterator rIt = enigma::instance_deactivated_list.find(x);
+    if (rIt!=enigma::instance_deactivated_list.end()) {
+      return iterator(((enigma::object_basic*)(rIt->second->inst)));
+    }
+
+    //Else, it's still live (or was null). Use normal dispatch.
+    return fetch_inst_iter_by_id(x);
   }
 
   // Implementation for frontend
