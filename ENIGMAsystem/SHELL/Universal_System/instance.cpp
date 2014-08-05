@@ -32,6 +32,7 @@
 //#include "reflexive_types.h"
 //#include "EGMstd.h"
 #include "object.h"
+#include <iostream>
 
 #include "instance_system.h"
 #include "instance.h"
@@ -51,7 +52,6 @@ namespace enigma_user
 void instance_deactivate_all(bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
-
         ((enigma::object_basic*)*it)->deactivate();
         enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
     }
