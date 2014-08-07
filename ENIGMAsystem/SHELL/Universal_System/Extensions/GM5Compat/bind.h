@@ -53,19 +53,19 @@ public:
 
   //Common operations.
   template <typename T>
-  T operator+(const T& rhs) const {
+  var operator+(const T& rhs) const {
     return orig + rhs;
   }
   template <typename T>
-  T operator-(const T& rhs) const {
+  var operator-(const T& rhs) const {
     return orig - rhs;
   }
   template <typename T>
-  T operator*(const T& rhs) const {
+  var operator*(const T& rhs) const {
     return orig * rhs;
   }
   template <typename T>
-  T operator/(const T& rhs) const {
+  var operator/(const T& rhs) const {
     return orig / rhs;
   }
 
