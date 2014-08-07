@@ -25,12 +25,12 @@
 namespace enigma_user
 {
 
-enigma::ConglomRefRO view_x(view_xview);
-enigma::ConglomRefRO view_y(view_yview);
-enigma::ConglomRefRO view_width(view_wview);
-enigma::ConglomRefRO view_height(view_hview);
-enigma::ConglomInterp view_left(view_xview, view_wview);
-enigma::ConglomInterp view_top(view_yview, view_hview);
+//enigma::BindArrayRO view_x(view_xview);
+//enigma::BindArrayRO view_y(view_yview);
+enigma::BindArrayRO view_width(view_wview);
+enigma::BindArrayRO view_height(view_hview);
+enigma::BindArrayRW view_left(view_xview);
+enigma::BindArrayRW view_top(view_yview);
 
 }
 
