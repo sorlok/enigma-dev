@@ -25,8 +25,8 @@
 namespace enigma_user
 {
 
-//enigma::BindArrayRO view_x(view_xview);
-//enigma::BindArrayRO view_y(view_yview);
+enigma::BindArrayRW view_x(view_xport);
+enigma::BindArrayRW view_y(view_yport);
 enigma::BindArrayRO view_width(view_wview);
 enigma::BindArrayRO view_height(view_hview);
 enigma::BindArrayRW view_left(view_xview);

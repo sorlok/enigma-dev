@@ -30,11 +30,9 @@ namespace enigma_user
 {
 
 //View variables that become ambiguous with the introduction of view+port notation.
-//Our approach to these is on a case-by-case basis. As a guiding principle, if there
-//are corresponding view_Xport and view_Xview variables, we always SET both, but only
-//GET the *view variant.
-//extern enigma::BindArrayRW view_x;      //View's X position. Mapped to view_xview
-//extern enigma::BindArrayRW view_y;      //View's Y position. Mapped to view_yview
+//Our approach to these is on a case-by-case basis.
+extern enigma::BindArrayRW view_x;      //View's X position. Mapped to view_xport
+extern enigma::BindArrayRW view_y;      //View's Y position. Mapped to view_yport
 extern enigma::BindArrayRO view_width;  //View width. Mapped to view_wview/view_wport
 extern enigma::BindArrayRO view_height; //View height. Mapped to view_hview/view_hport
 extern enigma::BindArrayRW view_left;   //Left side of the view. Mapped to view_xview
