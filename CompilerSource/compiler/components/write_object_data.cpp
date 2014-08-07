@@ -475,7 +475,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
 		
           wto << "    void activate()\n    {\n";
-          wto << "      is_active_QBwfSd = true;\n";
 			if (setting::inherit_objects && has_parent) {
 				wto << "      OBJ_" << parsed_objects.find(i->second->parent)->second->name << "::activate();\n";
 				// Have to remove the one the parent added so we can add our own
