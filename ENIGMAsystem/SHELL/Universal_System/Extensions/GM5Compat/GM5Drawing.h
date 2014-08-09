@@ -68,6 +68,9 @@ void draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sc
 void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
 void draw_circle(gs_scalar x, gs_scalar y, float radius);
 
+//Experimental
+int sprite_create_from_screen(int left, int top, int right, int bottom, bool precise, bool transparent, bool videomem, bool loadonuse, int xorig, int yorig);
+
 
 //Drawing - Polygons
 void draw_polygon_end();
