@@ -258,6 +258,11 @@ void draw_polygon_end()
 }
 
 
+int sprite_create_from_screen(int left, int top, int right, int bottom, bool precise, bool transparent, bool videomem, bool loadonuse, int xorig, int yorig)
+{
+  return sprite_create_from_screen(left, top, right-left, bottom-left, transparent, false, false, xorig, yorig);
+}
+
 
 }
 
