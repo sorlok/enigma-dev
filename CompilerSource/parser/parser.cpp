@@ -164,7 +164,6 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
-
   //For the sake of efficiency, however, we will reduce the number of passes by replacing multiple things at once.
 
   string synt;
@@ -189,20 +188,15 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
     parser_ready_input(code,synt,strct,strst);
   }
 
-
-
   parser_reinterpret(code,synt);
 
-
-
   parser_add_semicolons(code,synt);
-
 
   //cout << synt << endl;
   //cout << code << endl;
 
   if (pev) { cout << "collecting variables..."; fflush(stdout);
-    collect_variables(current_language, code,synt,pev, script_names); cout << " done>"; fflush(stdout);
+    collect_variables(current_language, code,synt,pev, script_names); cout << " done>"; fflush(stdout); //HERE #############################
 
   }
 

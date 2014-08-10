@@ -30,6 +30,7 @@
 //...No, it's not really that simple.
 
 #include <map>
+#include <vector>
 #include <string>
 #include <iostream>
 #include <stdio.h>
@@ -40,13 +41,15 @@ using namespace std;
 
 extern int global_script_argument_count;
 
-struct scope_ignore {
-  map<string,int> ignore;
-  bool is_with;
+//Tracks state variables for the current scope.
+struct scope_level {
+  map<string,int> ignore;  //List of ignored symbols for this scope.
+  bool is_with; //Did this or any previous scope represent a "with" block? If so, we need to tag variables.
+  bool no_bracket; //If true, this is a "single-line" scope (no brackets).
   
-  scope_ignore(scope_ignore*x): is_with(x->is_with) {}
-  scope_ignore(bool x): is_with(x) {}
-  scope_ignore(int x): is_with(x) {}
+//  scope_level(scope_ignore*x): is_with(x->is_with) {}
+  scope_level(bool is_with=false): is_with(is_with), no_bracket(false) {}
+//  scope_level(int is_with): is_with(is_with) {}
 };
 
 #include "object_storage.h"
@@ -55,11 +58,18 @@ struct scope_ignore {
 
 void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names)
 {
-  int igpos = 0;
-  darray<scope_ignore*> igstack;
-  igstack[igpos] = new scope_ignore(0);
+//  int igpos = 0;
+  std::vector<scope_level> scopes; //.back() is the current scope level.
+  std::pair<bool, scope_level> reify_scope; //The last popped "if" scope, to be restored if an "else" is encountered.
+  reify_scope.first = false; //Not currently holding anything.
+  scopes.push_back(scope_level(false));
+//  igstack[igpos] = new scope_ignore(0);
   
   cout << "\nCollecting some variables...\n";
+
+std::cerr <<"CODE: ###" <<code <<"###\n";
+std::cerr <<"SYNT: ###" <<synt <<"###\n";
+
   pt dec_start_pos = 0;
   
   int in_decl = 0, dec_out_of_scope = 0; //Not declaring, not declaring outside this scope via global or local
@@ -71,8 +81,11 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   bool dec_name_givn = false; //Has an identifier been named in this declaration?
   string dec_name; //Identifier being declared
   
-  int  with_after_parenths = 0;
-  bool with_until_semi = false;
+  int  counting_parens = 0; //How many parentheses are after the current if/with statement are we at? 
+  
+//bool with_until_semi = false;
+  bool last_was_with = false; //Was the last token parsed "with"?
+  bool skip_next_bracket = false; //If true, with(x), if(x), or similar have just pushed a scope to the stack. The very next bracket should be ignored.
 
   bool grab_tline_index = false; //Are we currently trying to stockpile a list of known timeline indices?
   
@@ -84,21 +97,82 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
     }
 
     if (synt[pos] == '{') {
-      bool isw = igstack[igpos]->is_with | with_until_semi; with_until_semi = 0;
-      igstack[++igpos] = new scope_ignore(isw);
+      //New scope. Inherit "is_with" from previous scope, or if we've just passed a "with" statement.
+      if (!skip_next_bracket) {
+        scopes.push_back(scope_level(scopes.back().is_with));
+      }
+      skip_next_bracket = false;
+//      bool isw = scopes.back().is_with || with_until_semi; 
+//      with_until_semi = 0;
+//      igstack[++igpos] = new scope_ignore(isw);
       continue;
     }
     if (synt[pos] == '}') {
-      delete igstack[igpos--];
+      if (pos+1<synt.size() && synt[pos+1]=='e') {
+        reify_scope.first = true;
+        reify_scope.second = scopes.back();
+      }
+
+      scopes.pop_back();//[igpos--];
+
+      //Pop more scopes?
+      if (pos+1<synt.size() && synt[pos+1]!='e') {
+        while (scopes.back().no_bracket) {
+          scopes.pop_back();
+        }
+      }
+
       continue;
     }
     
-    if (synt[pos] == '(' and with_after_parenths) with_after_parenths++;
-    if (synt[pos] == ')' and with_after_parenths and --with_after_parenths == 1)
-      with_until_semi = with_after_parenths--;
+    //Count parentheses, if we've just passed a with/if statement.
+    if (synt[pos] == '(' and counting_parens>0) {
+      counting_parens++;
+    }
+    if (synt[pos] == ')' and counting_parens>0) {
+      if (--counting_parens == 1) {
+        counting_parens = 0;
+
+        //We may be reifying an old scope.
+        if (reify_scope.first) {
+          scopes.push_back(reify_scope.second);
+          reify_scope.first = false;
+        } else {
+          scopes.push_back(scope_level(scopes.back().is_with || last_was_with));
+          last_was_with = false;
+        }
+
+        //Regardless, set the bracket state:
+        skip_next_bracket = pos+1<synt.size() && synt[pos+1]=='{';
+        scopes.back().no_bracket = !skip_next_bracket;
+
+        //scopes.back().no_bracket = pos==synt.size()-1 || synt[pos]!='{';
+        //with_until_semi = with_after_parenths--;
+      }
+    }
+
+    //End scope if a semicolon is encountered.
+    if (synt[pos]==';' && scopes.back().no_bracket) {
+      //...but save it if an "else" or "elseif" is next.
+      if (pos+1<synt.size() && synt[pos+1]=='e') {
+        reify_scope.first = true;
+        reify_scope.second = scopes.back();
+      }
+      scopes.pop_back();
+
+      //Pop more scopes?
+      if (pos+1<synt.size() && synt[pos+1]!='e') {
+        while (scopes.back().no_bracket) {
+          scopes.pop_back();
+        }
+      }
+    }
     
-    with_until_semi &= (synt[pos] != ';');
-    
+    //with_until_semi &= (synt[pos] != ';');
+
+//////////////////////////////////////////////////////////    
+//TODO: I am still not familiar with what this code does. This will have to be addressed before a pull request is made.
+//////////////////////////////////////////////////////////
     if (bracklevel == 0 and in_decl)
     {
       if (synt[pos] == ';' or synt[pos] == ',')
@@ -134,7 +208,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           }
           else //Add to this scope
           {
-            igstack[igpos]->ignore[dec_name] = pos;
+            scopes.back().ignore[dec_name] = pos;
             pos++; //cout << "Added `" << dec_name << "' to ig\n";
           }
         }
@@ -280,7 +354,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         //First, check shared locals to see if we already have one
         if (shared_object_locals.find(nname) != shared_object_locals.end()) {
           pev->myObj->globallocals[nname]++;
-          if (with_until_semi or igstack[igpos]->is_with) {
+          if (scopes.back().is_with) {
             pos += 5;
             cout << "Add a self. before " << nname;
             code.insert(spos,"self.");
@@ -296,12 +370,15 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         }
         
         //Next, make sure we're not specifically ignoring it
-        map<string,int>::iterator ex;
-        for (int i = igpos; i >= 0; i--)
-          if ((ex = igstack[i]->ignore.find(nname)) != igstack[i]->ignore.end()) {
-            cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n";
+        map<string,int>::const_iterator exIt;
+        size_t i=scopes.size()-1;
+        for (std::vector<scope_level>::const_reverse_iterator it=scopes.rbegin(); it!=scopes.rend(); it++) {
+          if ((exIt = it->ignore.find(nname)) != it->ignore.end()) {
+            cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " <<i << " since position " << exIt->second << ".\n";
             goto continue_2;
           }
+          i--;
+        }
         
         int argnum, iscr;
         iscr = sscanf(nname.c_str(),"argument%d",&argnum);
@@ -313,7 +390,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         }
         
         //Last, make sure we're not in a with.
-        if (with_until_semi or igstack[igpos]->is_with)
+        if (scopes.back().is_with)
         {
           pos += 5;
           code.insert(spos,"self.");
@@ -385,10 +462,36 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
     {
       const size_t sp = pos;
       while (synt[++pos] == 's');
-      if (code.substr(sp,(pos--)-sp) == "with") {
-        with_after_parenths = 1;
-        continue;
+      std::string stmt = code.substr(sp,(pos--)-sp);
+      if (stmt=="with" || stmt=="if" || stmt=="for" || stmt=="while") {
+        counting_parens = 1; //Prepare for a new scope (after parens, of course).
+        last_was_with = stmt=="with";
       }
+      continue;
+    } 
+    else if (synt[pos] == 'e')  //"else", or "elseif" (but "if" is still "ss").
+    {
+      //Only reify "else" here.
+      const size_t sp = pos;
+      while (synt[++pos] == 'e');
+      std::string stmt = code.substr(sp,(pos--)-sp);
+      if (stmt=="else") {
+        //Handle "elseif" later.
+        if (pos+1<synt.size() && synt[pos]!='s') {
+          //Reify the scope immediately.
+          scopes.push_back(reify_scope.second);
+          reify_scope.first = false;
+
+          //This may also be single-line.
+          skip_next_bracket = pos+1<synt.size() && synt[pos+1]=='{';
+          scopes.back().no_bracket = !skip_next_bracket;
+        }
+      } else {
+        reify_scope.first = false; //TODO: Do we have any other "e" syntaxes except "else"?
+      }
+
+      //TODO: Reify scope; but delay if "elseif"
+      //scopes.push_back(reify_scope);
     }
   }
   
@@ -397,4 +500,6 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   //Store these for later.
   pev->code = code;
   pev->synt = synt;
+
+std::cerr <<"AFTR: ###" <<code <<"###\n";
 }
