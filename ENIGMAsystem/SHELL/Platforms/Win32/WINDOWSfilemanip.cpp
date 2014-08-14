@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 
 #include "../General/PFini.h"
+#include "../General/PFfilemanip.h"
 
 using namespace std;
 
@@ -191,14 +192,14 @@ int directory_create(std::string dname) {
 // Maintainer: If this segment errors, it is an error of philosophy.
 // The Game Maker constants do not have a standard, but line up with
 // their Windows equivalents. Should either change, we have an issue.
-enum {
+/*enum {
   fa_readonly  = FILE_ATTRIBUTE_READONLY,
   fa_hidden    = FILE_ATTRIBUTE_HIDDEN,
   fa_sysfile   = FILE_ATTRIBUTE_SYSTEM,
   fa_volumeid  = 0x00000008,
   fa_directory = FILE_ATTRIBUTE_DIRECTORY,
   fa_archive   = FILE_ATTRIBUTE_ARCHIVE
-};
+};*/
 
 }
 
@@ -240,9 +241,8 @@ string file_find_next()
   return found.cFileName;
 }
 
-int file_find_close() {
+void file_find_close() {
   FindClose(current_find);
-  return 0;
 }
 
 bool file_attributes(std::string fname,int attributes)
