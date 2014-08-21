@@ -241,9 +241,8 @@ string file_find_next()
   return found.cFileName;
 }
 
-int file_find_close() {
+void file_find_close() {
   FindClose(current_find);
-  return 0;
 }
 
 bool file_attributes(std::string fname,int attributes)
