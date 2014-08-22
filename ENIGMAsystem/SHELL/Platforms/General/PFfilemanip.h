@@ -59,7 +59,7 @@ int directory_exists(std::string dname);
 int directory_create(std::string dname);
 
 std::string file_find_next();
-int file_find_close();
+void file_find_close();
 std::string file_find_first(std::string mask,int attr);
 
 bool file_attributes(std::string fname,int attributes);
