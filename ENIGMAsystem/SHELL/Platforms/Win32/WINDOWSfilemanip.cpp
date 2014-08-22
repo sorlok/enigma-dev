@@ -107,7 +107,7 @@ void ini_section_delete(std::string section)
 
 /* OS Specific; should be moved */
 
-int file_exists(filestr fname) {
+int file_exists(const filestr& fname) {
     DWORD attributes = GetFileAttributes(fname.c_str());
     if(attributes == 0xFFFFFFFF) {
         return 0;
