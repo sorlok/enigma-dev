@@ -110,7 +110,7 @@ endif
 ############
 
 compile_game: $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
-	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS) /home/sethhetu/mingw-root/usr/local/lib/libffi.a
+	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS) 
 	@echo Built to "$(OUTPUTNAME)"
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
