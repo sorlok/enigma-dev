@@ -21,7 +21,6 @@
 #include "../General/GSstdraw.h"
 #include "../General/GStextures.h"
 #include <stdio.h>
-#include <iostream>
 #include "Universal_System/roomsystem.h"
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -201,18 +200,10 @@ void CALLBACK combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLfl
     vertex[2] = coords[2];
 
     for (int i = 3; i < 6; i++) {
-      //TODO: This is a workaround for vertext_data[2] and [3] being null. Need to read up on this... maybe it's based on the weights?
-      vertex[i] = 0;
-      if (vertex_data[0]) { vertex[i] += weight[0] * vertex_data[0][i]; }
-      if (vertex_data[1]) { vertex[i] += weight[1] * vertex_data[1][i]; }
-      if (vertex_data[2]) { vertex[i] += weight[2] * vertex_data[2][i]; }
-      if (vertex_data[3]) { vertex[i] += weight[3] * vertex_data[3][i]; }
-
-//This is what it SHOULD look like:
-/*        vertex[i] = weight[0] * vertex_data[0][i]
+      vertex[i] = weight[0] * vertex_data[0][i]
                 + weight[1] * vertex_data[1][i]
                 + weight[2] * vertex_data[2][i]
-                + weight[3] * vertex_data[3][i];*/
+                + weight[3] * vertex_data[3][i];
     }
   }
 
