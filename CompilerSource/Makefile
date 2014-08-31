@@ -28,7 +28,7 @@ endif
 # options #
 ###########
 
-CXX := g++
+CXX := g++-mp-4.8
 CXXFLAGS += -Wall -g -I./JDI/src
 LDFLAGS += -shared
 
