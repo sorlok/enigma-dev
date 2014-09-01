@@ -8,6 +8,8 @@
 #################
 # TODO: better config process based on features rather than OS
 
+CXX := g++
+
 BASE = compileEGMf
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
@@ -15,6 +17,7 @@ ifeq ($(OS), Linux)
 	CXXFLAGS += -fPIC
 	MKDIR := mkdir
 else ifeq ($(OS), Darwin)
+	CXX := g++-mp-4.8
 	TARGET := ../lib$(BASE).dylib
 	CXXFLAGS += -fPIC
 	MKDIR := mkdir
@@ -28,7 +31,6 @@ endif
 # options #
 ###########
 
-CXX := g++-mp-4.8
 CXXFLAGS += -Wall -g -I./JDI/src
 LDFLAGS += -shared
 
