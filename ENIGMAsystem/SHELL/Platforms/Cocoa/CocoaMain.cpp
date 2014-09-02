@@ -23,6 +23,8 @@
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
 
 #include "../General/PFwindow.h"
 #include "../General/PFfilemanip.h"
@@ -36,6 +38,12 @@ namespace enigma_user {
 
 int main(int argc,char** argv)
 {
+  // Re-direct stdout and stderr
+  std::ofstream c_out("enigma_cout.txt");
+  std::cout.rdbuf(c_out.rdbuf());
+  std::ofstream c_err("enigma_cerr.txt");
+  std::cerr.rdbuf(c_err.rdbuf());
+
   // Set the working_directory
   char buffer[1024];
   if (getcwd(buffer, sizeof(buffer)) != NULL)
