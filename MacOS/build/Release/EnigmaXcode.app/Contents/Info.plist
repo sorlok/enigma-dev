@@ -5,28 +5,31 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>${EXECUTABLE_NAME}</string>
+	<string>MacOS/EnigmaXcode</string>
 	<key>CFBundleIconFile</key>
-	<string></string>
+	<string>EnigmaGame.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.${PRODUCT_NAME:rfc1034identifier}</string>
+	<string>org.enigma-dev.ENIGMA.123456</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>${PRODUCT_NAME}</string>
+	<string>ENIGMA</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
+	<string>1.6.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>1.6.0</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.4</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2008, Daniel Remar</string>
 </dict>
 </plist>
+
