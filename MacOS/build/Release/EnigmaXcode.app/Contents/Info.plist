@@ -9,11 +9,11 @@
 	<key>CFBundleIconFile</key>
 	<string>EnigmaGame.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.enigma-dev.ENIGMA.123456</string>
+	<string>org.enigma-dev.IJI.330782</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>ENIGMA</string>
+	<string>IJI</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
