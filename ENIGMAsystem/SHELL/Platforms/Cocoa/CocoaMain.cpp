@@ -25,6 +25,8 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <fstream>
+#include <cassert>
 
 #include "../General/PFwindow.h"
 #include "../General/PFfilemanip.h"
@@ -36,13 +38,21 @@ namespace enigma_user {
   std::string working_directory = "";
 }
 
+extern "C" void copy_bundle_cwd(char* res);
+
 int main(int argc,char** argv)
 {
-  // Re-direct stdout and stderr
-  std::ofstream c_out("enigma_cout.txt");
-  std::cout.rdbuf(c_out.rdbuf());
-  std::ofstream c_err("enigma_cerr.txt");
-  std::cerr.rdbuf(c_err.rdbuf());
+    // Re-direct stdout and stderr
+    freopen("/Users/sethhetu/Downloads/enigma_cout.txt","w",stdout);
+    freopen("/Users/sethhetu/Downloads/enigma_cerr.txt","w",stderr);
+    std::cout <<"cout redirect\n";
+    printf("printf redirect\n");
+
+
+{
+std::ofstream tmpout("/Users/sethhetu/Downloads/egm_log.txt", std::ofstream::out);
+tmpout <<"main() called\n";
+}
 
   // Set the working_directory
   char buffer[1024];
@@ -50,11 +60,26 @@ int main(int argc,char** argv)
      fprintf(stdout, "Current working dir: %s\n", buffer);
   else
      perror("getcwd() error");
+
+
+//NOTE: OSX is different.
+copy_bundle_cwd(&buffer[0]);
+
   enigma_user::working_directory = string( buffer );
+
+{
+std::ofstream tmpout("/Users/sethhetu/Downloads/egm_log.txt", std::ofstream::out | std::ofstream::app);
+tmpout <<"workind_directory is: " <<enigma_user::working_directory <<"\n";
+}
   
 	enigma::parameters=new char* [argc];
-	for (int i=0; i<argc; i++)
+	for (int i=0; i<argc; i++) {
+{
+std::ofstream tmpout("/Users/sethhetu/Downloads/egm_log.txt", std::ofstream::out | std::ofstream::app);
+tmpout <<"PARAM[" <<i <<"] = ***" <<argv[i] <<"***\n";
+}
 		enigma::parameters[i]=argv[i];
+   }
 
 	return mainO(argc, argv);
 }

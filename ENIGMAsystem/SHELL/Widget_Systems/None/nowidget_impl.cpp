@@ -22,6 +22,7 @@ using std::string;
 #include "Universal_System/instance_system.h"
 #include <cstdlib>
 #include <cstdio>
+#include <fstream>
 
 #include "GameSettings.h"
 
@@ -56,7 +57,16 @@ namespace enigma_user {
 
 int show_message(string message)
 {
+{
+std::ofstream tmpout("/Users/sethhetu/Downloads/egm_log.txt", std::ofstream::out | std::ofstream::app);
+tmpout <<"show_message: " <<message.c_str() <<"\n";
+}
   printf("show_message: %s\n",message.c_str());
+
+{
+std::ofstream tmpout("/Users/sethhetu/Downloads/egm_log.txt", std::ofstream::out | std::ofstream::app);
+tmpout <<"  >show_message, done\n";
+}
   return 0;
 }
 
