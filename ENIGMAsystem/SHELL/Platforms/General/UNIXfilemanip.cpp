@@ -30,14 +30,7 @@ using namespace std;
 namespace enigma_user
 {
 
-filestr::filestr(const char* fname) : data(fname) {
-  std::replace(data.begin(), data.end(), '\\', '/');
-}
-filestr::filestr(const std::string& fname) : data(fname) {
-  std::replace(data.begin(), data.end(), '\\', '/');
-}
-
-int file_exists(const filestr& fname)
+int file_exists(string fname)
 {
   struct stat st;
   return (stat(fname.c_str(),&st) == 0) and !(S_ISDIR(st.st_mode));

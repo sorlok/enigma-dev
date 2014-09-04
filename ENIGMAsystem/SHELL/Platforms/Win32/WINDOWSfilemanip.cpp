@@ -42,11 +42,6 @@ static std::string iniFilename = "";
 namespace enigma_user
 {
 
-filestr::filestr(const char* fname) : data(fname) {
-  //Uncomment if you want "\" to become "/" on Windows (more portable). (And #include <algorithm>)
-  //std::replace(data.begin(), data.end(), '\\', '/');
-}
-
 void ini_open(std::string fname)
 {
 	iniFilename = fname;
@@ -112,7 +107,7 @@ void ini_section_delete(std::string section)
 
 /* OS Specific; should be moved */
 
-int file_exists(const filestr& fname) {
+int file_exists(string fname) {
     DWORD attributes = GetFileAttributes(fname.c_str());
     if(attributes == 0xFFFFFFFF) {
         return 0;

@@ -31,8 +31,6 @@
 namespace enigma_user
 {
 
-class filestr;
-
 //Sprites
 void sprite_discard(int num);
 void sprite_restore(int num);

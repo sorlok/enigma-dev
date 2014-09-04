@@ -24,6 +24,7 @@
 ///This file contains audio functions in the GM5 style. 
 
 
+#include <string>
 #include "Universal_System/var4.h"
 #include "Universal_System/scalar.h"
 
@@ -31,10 +32,8 @@
 namespace enigma_user
 {
 
-class filestr; //From PFfilemanip
-
 //Add a sound (the other parameters are ignored).
-int sound_add(const filestr& fName, int buffers, bool useEffects, bool loadOnUse);
+int sound_add(std::string fName, int buffers, bool useEffects, bool loadOnUse);
 
 //Modify the sound's frequency (approximated with pitch).
 void sound_frequency(int sound, float value);
