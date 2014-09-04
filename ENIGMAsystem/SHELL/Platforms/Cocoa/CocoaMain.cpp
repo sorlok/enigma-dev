@@ -42,18 +42,6 @@ extern "C" void copy_bundle_cwd(char* res);
 
 int main(int argc,char** argv)
 {
-    // Re-direct stdout and stderr
-    freopen("/Users/sethhetu/Downloads/enigma_cout.txt","w",stdout);
-    freopen("/Users/sethhetu/Downloads/enigma_cerr.txt","w",stderr);
-    std::cout <<"cout redirect\n";
-    printf("printf redirect\n");
-
-
-{
-std::ofstream tmpout("/Users/sethhetu/Downloads/egm_log.txt", std::ofstream::out);
-tmpout <<"main() called\n";
-}
-
   // Set the working_directory
   char buffer[1024];
   if (getcwd(buffer, sizeof(buffer)) != NULL)
@@ -62,22 +50,13 @@ tmpout <<"main() called\n";
      perror("getcwd() error");
 
 
-//NOTE: OSX is different.
-copy_bundle_cwd(&buffer[0]);
+  //NOTE: OSX is different.
+  copy_bundle_cwd(&buffer[0]);
 
   enigma_user::working_directory = string( buffer );
-
-{
-std::ofstream tmpout("/Users/sethhetu/Downloads/egm_log.txt", std::ofstream::out | std::ofstream::app);
-tmpout <<"workind_directory is: " <<enigma_user::working_directory <<"\n";
-}
   
 	enigma::parameters=new char* [argc];
 	for (int i=0; i<argc; i++) {
-{
-std::ofstream tmpout("/Users/sethhetu/Downloads/egm_log.txt", std::ofstream::out | std::ofstream::app);
-tmpout <<"PARAM[" <<i <<"] = ***" <<argv[i] <<"***\n";
-}
 		enigma::parameters[i]=argv[i];
    }
 
