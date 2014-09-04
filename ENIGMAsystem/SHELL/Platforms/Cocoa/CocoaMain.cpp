@@ -38,7 +38,7 @@ namespace enigma_user {
   std::string working_directory = "";
 }
 
-extern "C" void copy_bundle_cwd(char* res);
+//extern "C" void copy_bundle_cwd(char* res);
 
 int main(int argc,char** argv)
 {
@@ -51,7 +51,7 @@ int main(int argc,char** argv)
 
 
   //NOTE: OSX is different.
-  copy_bundle_cwd(&buffer[0]);
+  //copy_bundle_cwd(&buffer[0]);
 
   enigma_user::working_directory = string( buffer );
   
