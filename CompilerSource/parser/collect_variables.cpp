@@ -67,9 +67,6 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   
   cout << "\nCollecting some variables...\n";
 
-std::cerr <<"CODE: ###" <<code <<"###\n";
-std::cerr <<"SYNT: ###" <<synt <<"###\n";
-
   pt dec_start_pos = 0;
   
   int in_decl = 0, dec_out_of_scope = 0; //Not declaring, not declaring outside this scope via global or local
