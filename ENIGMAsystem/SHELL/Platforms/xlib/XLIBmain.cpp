@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string>
 #include <cstdlib>
+#include <iostream>
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -229,11 +230,15 @@ int main(int argc,char** argv)
      perror("getcwd() error");
   enigma_user::working_directory = string( buffer );
 
+std::cerr <<"workind_directory is: " <<enigma_user::working_directory <<"\n";
+
   // Copy our parameters
     enigma::parameters = new string[argc];
     enigma::parameterc = argc;
-    for (int i=0; i<argc; i++)
+    for (int i=0; i<argc; i++) {
+std::cerr <<"PARAM[" <<i <<"] = ***" <<argv[i] <<"***\n";
         enigma::parameters[i]=argv[i];
+    }
     enigma::initkeymap();
 
 

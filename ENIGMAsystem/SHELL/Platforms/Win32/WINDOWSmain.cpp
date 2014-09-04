@@ -193,6 +193,10 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     char buffer[MAX_PATH];
     GetCurrentDirectory( MAX_PATH, buffer );
     enigma_user::working_directory = string( buffer );
+{
+std::ofstream tmpout("C:\\Users\\sethhetu\\Desktop\\egm_log.txt", std::ofstream::out | std::ofstream::app);
+tmpout <<"workind_directory is: " <<enigma_user::working_directory <<"\n";
+}
 
     // Set the program_directory
     memset(&buffer[0], 0, MAX_PATH);
@@ -208,6 +212,11 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
             snprintf( buffer, 256, "%ls", argv[i]); //Maybe we should check and show some warning if the argument was longer than 256
             string param = buffer;
             enigma::main_argv.push_back(param);
+
+{
+std::ofstream tmpout("C:\\Users\\sethhetu\\Desktop\\egm_log.txt", std::ofstream::out | std::ofstream::app);
+tmpout <<"PARAM[" <<i <<"] = ***" <<buffer <<"***\n";
+}
         }
         LocalFree(argv);
     }
