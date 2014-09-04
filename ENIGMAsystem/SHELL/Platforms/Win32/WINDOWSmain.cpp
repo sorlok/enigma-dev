@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <unistd.h>
 #include <vector>
+#include <iostream>
+#include <fstream>
 using std::string;
 using std::vector;
 
