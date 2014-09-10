@@ -53,10 +53,6 @@ void discard_all()
 {
 }
 
-void set_graphics_mode(bool exclusive, int horizRes, int colorDepth, int freq, bool fullscreen, int winScale, int fullScale)
-{
-}
-
 void screen_gamma(double r, double g, double b)
 {
 }

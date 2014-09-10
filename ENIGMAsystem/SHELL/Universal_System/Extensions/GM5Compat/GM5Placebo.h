@@ -47,7 +47,6 @@ void sound_restore(int num);
 void discard_all();
 
 //TODO: These are not properly implemented yet.
-void set_graphics_mode(bool exclusive, int horizRes, int colorDepth, int freq, bool fullscreen, int winScale, int fullScale);
 void screen_gamma(double r, double g, double b);
 
 }
