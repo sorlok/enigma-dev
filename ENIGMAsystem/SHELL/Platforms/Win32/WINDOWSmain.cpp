@@ -49,6 +49,7 @@ namespace enigma //TODO: Find where this belongs
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
+  HANDLE mainthread;
   extern bool gameWindowFocused, freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
 
@@ -190,6 +191,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     if (!wid || !hgt) wid = 640, hgt = 480;
     enigma::hInstance = hInstance;
+    enigma::mainthread = GetCurrentThread();
 
     // Set the working_directory
     char buffer[MAX_PATH];
