@@ -37,6 +37,15 @@ const char* cocoa_window_get_caption()
 	return [[[delegate window] title] UTF8String];	
 }
 
+int cocoa_get_screen_size(int getWidth)
+{
+	if (getWidth) {
+		return [[NSScreen mainScreen] frame].size.width;
+	} else {
+		return [[NSScreen mainScreen] frame].size.height;
+	}
+}
+
 int getWindowDimension(int i)
 {
 	if(i == 0) return [[delegate window] frame].origin.x;

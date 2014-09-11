@@ -47,6 +47,8 @@ void gmw_init()
 extern char cocoa_keybdstatus[256];
 extern char cocoa_last_keybdstatus[256];
 
+int cocoa_get_screen_size(int getWidth);
+
 namespace enigma {
     extern char keybdstatus[256];
     extern char mousestatus[3];
@@ -401,9 +403,17 @@ namespace enigma {
 	}
 }
 
+int display_get_width()
+{
+	return cocoa_get_screen_size(true);
+}
+
+int display_get_height()
+{
+	return cocoa_get_screen_size(false);
+}
+
 /*
- display_get_width() // Returns the width of the display in pixels.
- display_get_height() // Returns the height of the display in pixels.
  display_set_size(w,h) Sets the width and height of the display in pixels. Returns whether this was
  successful. (Realize that only certain combinations are allowed.)
  display_get_colordepth() Returns the color depth in bits.
