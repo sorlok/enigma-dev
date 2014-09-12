@@ -32,6 +32,20 @@
 EnigmaXcodeAppDelegate* delegate;
 NSPoint mouse; 
 
+void cocoa_window_set_fullscreen(bool full) 
+{
+	if (full) {
+		[[delegate window] enterFullScreenMode:fullScreen withOptions:None];
+	} else {
+		[[delegate window] exitFullScreenMode:fullScreen withOptions:None];
+	}
+}
+
+int cocoa_window_get_fullscreen()
+{
+	return (([[delegate window] styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask);
+}
+
 const char* cocoa_window_get_caption()
 {
 	return [[[delegate window] title] UTF8String];	
