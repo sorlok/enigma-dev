@@ -35,15 +35,15 @@ NSPoint mouse;
 void cocoa_window_set_fullscreen(bool full) 
 {
 	if (full) {
-		[[delegate window] enterFullScreenMode:fullScreen withOptions:None];
+		[[delegate enigmaview] enterFullScreenMode:[NSScreen mainScreen] withOptions:nil];
 	} else {
-		[[delegate window] exitFullScreenMode:fullScreen withOptions:None];
+		[[delegate enigmaview] exitFullScreenModeWithOptions: nil];
 	}
 }
 
 int cocoa_window_get_fullscreen()
 {
-	return (([[delegate window] styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask);
+	return [[delegate enigmaview] isInFullScreenMode];
 }
 
 const char* cocoa_window_get_caption()
