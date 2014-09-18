@@ -272,7 +272,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Sub Check: !(int(image_index) % image_count)
+	Sub Check: !(int(image_index_actual()) % image_count)
 
 
 # End of in-linked events

@@ -53,7 +53,7 @@ inline void action_draw_rectangle(const gs_scalar x1, const gs_scalar y1, const 
 inline void action_sprite_set(const double spritep, const  double subimage, const double speed) {
     enigma::object_graphics* const inst = ((enigma::object_graphics*)enigma::instance_event_iterator->inst);
     inst->sprite_index=spritep;
-	inst->image_single=-1;
+	inst->image_single=-1; //TODO: Check if GM resets the image_single param (or do we care?)
 	if ((int)subimage !=-1) inst->image_index=subimage;
 	inst->image_speed=speed;
 }
@@ -253,7 +253,7 @@ inline bool action_replace_background(int ind, std::string filename)
 inline int draw_self()
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    draw_sprite_ext(inst->sprite_index, inst->image_index, inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
+    draw_sprite_ext(inst->sprite_index, inst->image_index_actual(), inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
     return 0;
 }  //actions seemed the best place for this
 

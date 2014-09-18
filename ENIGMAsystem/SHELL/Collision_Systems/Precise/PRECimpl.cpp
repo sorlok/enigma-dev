@@ -319,8 +319,8 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             enigma::sprite* sprite1 = enigma::spritestructarray[collsprite_index1];
             enigma::sprite* sprite2 = enigma::spritestructarray[collsprite_index2];
 
-            const int usi1 = ((int) inst1->image_index) % sprite1->subcount;
-            const int usi2 = ((int) inst2->image_index) % sprite2->subcount;
+            const int usi1 = ((int) inst1->image_index_actual()) % sprite1->subcount;
+            const int usi2 = ((int) inst2->image_index_actual()) % sprite2->subcount;
 
             unsigned char* pixels1 = (unsigned char*) (sprite1->colldata[usi1]);
             unsigned char* pixels2 = (unsigned char*) (sprite2->colldata[usi2]);
@@ -432,7 +432,7 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
             enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index_actual()) % sprite->subcount;
 
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
@@ -538,7 +538,7 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
 
                 enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
 
-                const int usi = ((int) inst->image_index) % sprite->subcount;
+                const int usi = ((int) inst->image_index_actual()) % sprite->subcount;
 
                 unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
@@ -612,7 +612,7 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
 
             enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index_actual()) % sprite->subcount;
 
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
@@ -710,7 +710,7 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
 
             enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index_actual()) % sprite->subcount;
 
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
@@ -775,7 +775,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
 
             enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index_actual()) % sprite->subcount;
 
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
@@ -836,7 +836,7 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
 
             enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index_actual()) % sprite->subcount;
 
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
