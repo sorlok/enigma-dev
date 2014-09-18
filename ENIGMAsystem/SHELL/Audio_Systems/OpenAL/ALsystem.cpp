@@ -143,7 +143,7 @@ namespace enigma {
     buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
 
     if(!buf) {
-      fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
+      fprintf(stderr, "Could not buffer sound %d: %s\n", id, alureGetErrorString());
       return 2;
     }
 
