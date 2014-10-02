@@ -27,7 +27,7 @@
   #endif
 
   // Types
-  namespace enigma { enum var_types { vt_real, vt_tstr }; }
+  namespace enigma { enum var_types { vt_real, vt_tstr, vt_ptr }; }
 #endif
 
 #undef EVCONST

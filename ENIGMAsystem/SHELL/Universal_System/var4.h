@@ -55,6 +55,7 @@ struct variant
 
   enigma::rvt rval;
   string sval;
+  void* pval;
   int type;
   
   operator int();
@@ -88,8 +89,16 @@ struct variant
   operator float() const;
   
   operator string() const;
+
+  void* to_ptr() const {
+    if (type==enigma::vt_ptr) {
+      return pval;
+    }
+    return 0;
+  }
   
   variant();
+  variant(void* ptr);
   types_extrapolate_alldecc(variant)
   
   types_extrapolate_alldec(variant& operator=)
@@ -153,6 +162,22 @@ struct variant
   
   ~variant();
 };
+
+
+
+#include <iostream>
+namespace enigma_user {
+  inline void* temp_make_pointer() {
+    void* temp = new variant();
+    std::cerr <<"CREATE pointer at: " <<temp <<"\n";
+    return temp;
+  }
+
+  inline void* temp_get_pointer(variant var) {
+    std::cerr <<"RETURN pointer at: " <<var.to_ptr() <<"\n";
+    return var.to_ptr();
+  }
+}
 
 
 

@@ -93,16 +93,17 @@ variant::operator string() const { ccast(1); return sval; }
 #define real enigma::vt_real
 #define tstr enigma::vt_tstr
 
-types_extrapolate_real_p  (variant::variant,: rval(x), sval( ), type(real) {})
-types_extrapolate_string_p(variant::variant,: rval(0), sval(x), type(tstr) {})
+types_extrapolate_real_p  (variant::variant,: rval(x), sval( ), pval(0), type(real) {})
+types_extrapolate_string_p(variant::variant,: rval(0), sval(x), pval(0), type(tstr) {})
 //variant::variant(var x): rval(x[0].rval), sval(x[0].sval) { }
-variant::variant(const variant& x): rval(x.rval.d), sval(x.sval), type(x.type) { }
-variant::variant(const var& x): rval((*x).rval.d), sval((*x).sval), type((*x).type) { }
-variant::variant(): rval(0), sval( ), type(default_type) { }
+variant::variant(void* ptr) : rval(0), sval(), pval(ptr), type(enigma::vt_ptr) {}
+variant::variant(const variant& x): rval(x.rval.d), sval(x.sval), pval(x.pval), type(x.type) { }
+variant::variant(const var& x): rval((*x).rval.d), sval((*x).sval), pval((*x).pval), type((*x).type) { }
+variant::variant(): rval(0), sval( ), pval(0), type(default_type) { }
 
 types_extrapolate_real_p  (variant& variant::operator=, { rval.d = x; type = real; return *this; })
 types_extrapolate_string_p(variant& variant::operator=, { sval   = x; type = tstr; return *this; })
-variant& variant::operator=(const variant x)            { rval.d = x.rval.d; if ((type = x.type) == tstr) sval = x.sval; return *this; }
+variant& variant::operator=(const variant x)            { rval.d = x.rval.d; pval = x.pval; if ((type = x.type) == tstr) sval = x.sval; return *this; }
 variant& variant::operator=(const var &x)               { return *this = *x; }
 types_extrapolate_real_p  (variant& variant::operator+=, { terror(real); rval.d += x; return *this; })
 types_extrapolate_string_p(variant& variant::operator+=, { terror(tstr); sval   += x; return *this; })
@@ -529,6 +530,8 @@ string toString(const variant &a)
       return toString(lVal);
     }
     return toString(dVal);
+  } else if (a.type == enigma::vt_ptr) {
+    return toString(a.pval);
   }
   return a.sval;
 }

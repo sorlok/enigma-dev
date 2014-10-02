@@ -21,6 +21,7 @@
 // They are also, directly or otherwise, available to the user.
 
 #include <string>
+#include <sstream>
 #include <stdio.h>
 
 #include "libEGMstd.h"
@@ -33,6 +34,7 @@ namespace {
   char buf[128];
 }
 
+string toString(void* p)                { std::stringstream msg; msg<<p; return msg.str(); }
 string toString(int n)                { return string(buf,sprintf(buf,"%d",  n)); }
 string toString(long n)               { return string(buf,sprintf(buf,"%ld", n)); }
 string toString(short n)              { return string(buf,sprintf(buf,"%d",  n)); }

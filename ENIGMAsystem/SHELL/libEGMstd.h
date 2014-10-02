@@ -23,6 +23,7 @@
 
 using std::string;
 
+string toString(void* p);
 string toString(int);
 string toString(long);
 string toString(short);
