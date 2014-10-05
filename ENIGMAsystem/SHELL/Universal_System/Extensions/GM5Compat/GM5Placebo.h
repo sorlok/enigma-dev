@@ -46,6 +46,9 @@ void sound_restore(int num);
 //General
 void discard_all();
 
+//TEMP
+void screen_gamma(double r, double g, double b);
+
 }
 
 #endif // ENIGMA_GM5COMPAT_PLACEBO__H

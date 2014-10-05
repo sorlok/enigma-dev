@@ -51,6 +51,10 @@ void discard_all()
 {
 }
 
+void screen_gamma(double r, double g, double b)
+{
+}
+
 
 }
 
