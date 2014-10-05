@@ -156,8 +156,8 @@ namespace enigma
   void graphics_delete_texture(int texid)
   {
     delete textureStructs[texid];
-    textureStructs.erase(tex);
-    free_tex_ids.insert(tex);
+    textureStructs.erase(texid);
+    free_tex_ids.insert(texid);
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
