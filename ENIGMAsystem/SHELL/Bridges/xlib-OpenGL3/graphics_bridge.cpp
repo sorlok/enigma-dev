@@ -17,7 +17,14 @@
 **/
 //#include <GL/glx.h>
 #include <X11/Xlib.h>
-#include "../General/glxew.h"
+
+#include "Graphics_Systems/General/glew.h"
+//#include "../General/glxew.h"
+
+#include <GL/gl.h>
+#include <GL/glx.h>
+#include <GL/glxext.h>
+
 #include "Platforms/xlib/XLIBmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -114,6 +121,8 @@ namespace enigma {
     return vi;
   }
 
+  typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
+  typedef void ( *PFNGLXSWAPINTERVALEXTPROC) (Display *dpy, GLXDrawable drawable, int interval);
   void EnableDrawing() {
 
     GLXContext glxtc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
@@ -141,6 +150,11 @@ namespace enigma {
       #endif
       0
     };
+
+    //Try to pull out the glXCreateContextAttribsARB function directly
+    glXCreateContextAttribsARBProc glXCreateContextAttribsARB = 0;
+    glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc)
+        glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
 
     glxc = glXCreateContextAttribsARB( enigma::x11::disp, fbc[0], NULL, True, attribs );
 
@@ -253,11 +267,16 @@ void set_synchronization(bool enable) {
 
 	  int interval = enable ? 1 : 0;
 
+    //More hacks
+    PFNGLXSWAPINTERVALEXTPROC glXSwapIntervalEXT = 0;
+    glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC)
+        glXGetProcAddressARB( (const GLubyte *) "glXSwapIntervalEXT" );
+
 	  if (enigma::is_ext_swapcontrol_supported()) {
 		glXSwapIntervalEXT(enigma::x11::disp, drawable, interval);
 	  }
 	  else if (enigma::is_mesa_swapcontrol_supported()) {
-		glXSwapIntervalMESA(interval);
+		//glXSwapIntervalMESA(interval);
 	  }
 	  // NOTE: GLX_SGI_swap_control, which is not used here, does not seem
 	  // to support disabling of synchronization, since its argument may not
