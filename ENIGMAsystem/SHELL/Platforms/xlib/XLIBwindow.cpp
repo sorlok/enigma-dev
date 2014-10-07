@@ -22,7 +22,6 @@
 #include <string> //Return strings without needing a GC
 #include <map>
 #include <X11/Xlib.h>
-#include <GL/glx.h>
 
 using namespace std;
 
@@ -41,8 +40,59 @@ using namespace std;
 using namespace enigma::x11;
 
 namespace enigma {
-	extern bool freezeOnLoseFocus;
-   extern int windowColor;
+  bool windowAdapt = true;
+  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+  double scaledWidth = 0, scaledHeight = 0;
+  extern bool isFullScreen,freezeOnLoseFocus;
+  extern int viewScale, windowColor;
+    
+  void setwindowsize()
+  {
+      if (!regionWidth)
+          return;
+
+      Screen *screen = DefaultScreenOfDisplay(disp);
+      int parWidth = isFullScreen?XWidthOfScreen(screen):windowWidth, parHeight = isFullScreen?XHeightOfScreen(screen):windowHeight;
+      if (viewScale > 0)  //Fixed Scale
+      {
+          double viewDouble = viewScale/100.0;
+          scaledWidth = regionWidth*viewDouble;
+          scaledHeight = regionHeight*viewDouble;
+      }
+      else if (viewScale == 0)  //Full Scale
+      {
+          scaledWidth = parWidth;
+          scaledHeight = parHeight;
+      }
+      else  //Keep Aspect Ratio
+      {
+          double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
+          if (fitWidth < fitHeight)
+          {
+              scaledWidth = parWidth;
+              scaledHeight = regionHeight*fitWidth;
+          }
+          else
+          {
+              scaledWidth = regionWidth*fitHeight;
+              scaledHeight = parHeight;
+          }
+      }
+
+      if (!isFullScreen)
+      {
+          if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
+          {
+              if (scaledWidth > windowWidth)
+                  windowWidth = scaledWidth;
+              if (scaledHeight > windowHeight)
+                  windowHeight = scaledHeight;
+          }
+           //clampwindow();
+      } else {
+        //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
+      }
+  }
 }
 
 //////////
@@ -82,8 +132,10 @@ void window_set_visible(bool visible)
 	if(visible)
 	{
 		XMapRaised(disp,win);
-		GLXContext glxc = glXGetCurrentContext();
-		glXMakeCurrent(disp,win,glxc);
+    //TODO: Move to bridges or some shit this is the last remaining GL call in XLIB
+    //#include <GL/glx.h>
+		//GLXContext glxc = glXGetCurrentContext();
+		//glXMakeCurrent(disp,win,glxc);
 		if(visx != -1 && visy != -1)
 			window_set_position(visx,visy);
 	}
@@ -148,7 +200,7 @@ bool window_get_minimized(){ return false; };
 
 void window_default(bool center_size)
 {
-  unsigned int xm = room_width, ym = room_height;
+  int xm = room_width, ym = room_height;
   if (view_enabled)
   {
     int tx = 0, ty = 0;
@@ -176,10 +228,13 @@ void window_default(bool center_size)
   if (center_size) {
     center = (xm != window_get_width() || ym != window_get_height());
   }
-  window_set_size(xm, ym);
+  enigma::windowWidth = enigma::regionWidth = xm;
+  enigma::windowHeight = enigma::regionHeight = ym;
   if (center) {
     window_center();
   }
+  
+  enigma::setwindowsize();
 }
 
 void window_mouse_set(int x,int y) {
@@ -195,6 +250,7 @@ void display_mouse_set(double x,double y) {
 ////////////
 // WINDOW //
 ////////////
+
 static int getWindowDimension(int i)
 {
 	XFlush(disp);
@@ -228,6 +284,9 @@ void window_set_position(int x,int y)
 }
 void window_set_size(unsigned int w,unsigned int h) {
 	XResizeWindow(disp,win, w, h);
+  enigma::windowWidth = w;
+  enigma::windowHeight = h;
+  enigma::setwindowsize();
 }
 void window_set_rectangle(int x,int y,int w,int h) {
 	XMoveResizeWindow(disp, win, x, y, w, h);
@@ -311,9 +370,7 @@ short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68,
 
 namespace enigma
 {
-  //Replacing usermap array with keybdmap map, to align code with Windows implementation.
   std::map<int,int> keybdmap;
-  //unsigned char usermap[256];
 
   unsigned char keymap[512];
   void initkeymap()
@@ -477,29 +534,57 @@ void keyboard_clear(const int key)
   enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
 }
 
+bool keyboard_check_direct(int key)
+{
+ // gk=XLookupKeysym(&e.xkey,0);
+ // if (gk==NoSymbol)
+  //  return 0;
 
-void window_set_region_scale(double scale, bool adaptwindow) {}
-double window_get_region_scale() {return 1;}
-void window_set_region_size(int w, int h, bool adaptwindow) {}
+ // if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
+ // else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
+}
+
+void window_set_region_scale(double scale, bool adaptwindow)
+{
+    enigma::viewScale = int(scale*100);
+    enigma::windowAdapt = adaptwindow;
+    enigma::setwindowsize();
+}
+
+double window_get_region_scale()
+{
+    return enigma::viewScale/100.0;
+}
+
+void window_set_region_size(int w, int h, bool adaptwindow)
+{
+    if (w <= 0 || h <= 0) return;
+
+    enigma::regionWidth = w;
+    enigma::regionHeight = h;
+    enigma::windowAdapt = adaptwindow;
+    enigma::setwindowsize();
+    window_center();
+}
 
 int window_get_region_width()
 {
-    return window_get_width();
+    return enigma::regionWidth;
 }
 
 int window_get_region_height()
 {
-    return window_get_height();
+    return enigma::regionHeight;
 }
 
 int window_get_region_width_scaled()
 {
-    return window_get_width();
+    return enigma::scaledWidth;
 }
 
 int window_get_region_height_scaled()
 {
-    return window_get_height();
+    return enigma::scaledHeight;
 }
 
 void window_set_color(int color)
