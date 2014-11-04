@@ -1,0 +1,12 @@
+%E-YAML
+---
+
+Name: SuperSound
+ID: Super Sound
+Description: Provides the SuperSound API to developers.
+Default: false
+Build-date: 11/02/2014
+Icon: ss_logo.png
+
+Depends: None
+Dependencies: None
