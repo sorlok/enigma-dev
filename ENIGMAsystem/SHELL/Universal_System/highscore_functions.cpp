@@ -155,11 +155,11 @@ void highscore_add_current() {
 }
 
 int highscore_value(int place) {
-    return enigma::highscore_list.at(place).player_score;
+    return place<enigma::highscore_list.size() ? enigma::highscore_list[place].player_score : 0;
 }
 
 std::string highscore_name(int place) {
-    return enigma::highscore_list[place].player_name;
+    return place<enigma::highscore_list.size() ? enigma::highscore_list[place].player_name : "Unknown";
 }
 
 }
