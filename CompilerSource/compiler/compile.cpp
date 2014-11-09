@@ -524,6 +524,17 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
       wto << "  " << es->rooms[i].name << " = " << es->rooms[i].id << ",\n";
     }
     wto << "};}\nnamespace enigma { size_t room_idmax = " <<max << "; }\n\n";
+
+//TEMP:
+wto << "namespace enigma_user {\n"
+    << "int room_lookup(const string& str) {\n";
+    for (int i = 0; i < es->roomCount; i++) {
+      wto <<"  if (str == \"" <<es->rooms[i].name <<"\") { return " <<es->rooms[i].id <<"; }\n";
+    }
+wto << "  return -1;\n"
+    << "}\n}\n";
+
+
   wto.close();
 
 
