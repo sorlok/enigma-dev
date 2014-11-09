@@ -19,6 +19,8 @@
 
 #include "GM5Placebo.h"
 
+#include "Graphics_Systems/General/GSsprite.h"
+
 
 namespace enigma_user
 {
@@ -50,6 +52,19 @@ void sound_restore(int num)
 void discard_all()
 {
 }
+
+void sound_background_tempo(float f)
+{
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool b1, bool b2, bool b3, bool b4, int xorig, int yorig)
+{
+  return sprite_create_from_screen(x, y, w, h, false, false, xorig, yorig);
+}
+
+void registry_write_string(std::string name, std::string str) {}
+
+void registry_write_real(std::string name, int x) {}
 
 
 }

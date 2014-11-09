@@ -20,6 +20,9 @@
 #define ENIGMA_GM5COMPAT_PLACEBO__H
 
 
+#include <string>
+
+
 ///This file contains functions which are no longer used by GM or ENIGMA,
 /// but which GM5 scripts may expect to see. All of them do absolutely
 /// no processing.
@@ -45,6 +48,15 @@ void sound_restore(int num);
 
 //General
 void discard_all();
+
+void sound_background_tempo(float f);
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool b1, bool b2, bool b3, bool b4, int xorig, int yorig);
+
+void registry_write_string(std::string name, std::string str);
+
+void registry_write_real(std::string name, int x);
+
 
 }
 
