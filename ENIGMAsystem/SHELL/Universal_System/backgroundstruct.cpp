@@ -123,7 +123,7 @@ namespace enigma
     unsigned int w, h, fullwidth, fullheight;
 
     unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,false);
-    if (pxdata == NULL) { printf("ERROR - Failed to append background to index!\n"); return; }
+    if (pxdata == NULL) { printf("ERROR - Failed to append background to index: %s\n", filename.c_str()); return; }
     
     // If background is transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
     if (pxdata && transparent)
