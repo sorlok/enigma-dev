@@ -58,6 +58,8 @@ string sound_get_name(int i);
 string script_get_name(int i);
 string shader_get_name(int i);
 
+int room_lookup(const string& str);
+
 }
 
 #endif

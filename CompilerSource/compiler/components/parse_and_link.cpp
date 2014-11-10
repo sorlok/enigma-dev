@@ -445,27 +445,37 @@ int lang_CPP::link_ambiguous(parsed_object *global, EnigmaStruct *es,parsed_scri
   for (int i = 0; i < es->scriptCount; i++)
   {
     parsed_object &t = scripts[i]->obj;
+cout <<"Loop...\n";
     for (parsed_object::ambit it = t.ambiguous.begin(); it != t.ambiguous.end(); it++)
     {
       parsed_object::globit g = global->globals.find(it->first);
-      if (g == global->globals.end())
-        t.locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for script `" << es->scripts[i].name << "'" << endl;
-      else
+      if (g == global->globals.end()) {
+cout <<"Start....\n";
+        t.locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for script[1] `" << es->scripts[i].name << "'" << endl;
+cout <<"OK!\n";
+      } else {
         cout << "Determined `" << it->first << "' to be global for script `" << es->scripts[i].name << "'" << endl;
+      }
     }
+cout <<"Loop done!\n";
   }
+cout <<"Loop...\n";
   for (int i = 0; i < int(tlines.size()); i++)
   {
     parsed_object &t = tlines[i]->obj;
     for (parsed_object::ambit it = t.ambiguous.begin(); it != t.ambiguous.end(); it++)
     {
       parsed_object::globit g = global->globals.find(it->first);
-      if (g == global->globals.end())
-        t.locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for script `" << es->timelines[i].name << "'" << endl;
-      else
+      if (g == global->globals.end()) {
+cout <<"Start: " <<i <<" of " <<tlines.size() <<"\n";
+        t.locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for a timeline " << endl;
+cout <<"OK!\n";
+      } else {
         cout << "Determined `" << it->first << "' to be global for script `" << es->timelines[i].name << "'" << endl;
+      }
     }
   }
+cout <<"Loop done!\n";
   
   return 0;
 }

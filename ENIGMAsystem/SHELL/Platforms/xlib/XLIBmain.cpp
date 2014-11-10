@@ -44,6 +44,7 @@ namespace enigma_user {
   extern int keyboard_lastkey;
   extern string keyboard_lastchar;
   extern string keyboard_string;
+  std::string program_directory = "";
 }
 
 namespace enigma

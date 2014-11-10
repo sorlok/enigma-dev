@@ -57,6 +57,12 @@ void registry_write_string(std::string name, std::string str);
 
 void registry_write_real(std::string name, int x);
 
+bool registry_exists(std::string name);
+
+int registry_read_real(std::string name);
+
+std::string registry_read_string(std::string name);
+
 
 }
 
