@@ -297,8 +297,43 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
 
   edbg << "Copying constant names [" << es->constantCount << "]" << flushl;
-  for (int i = 0; i < es->constantCount; i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->constants[i].name);
+
+
+//TEMP: Constants are broken.
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "VERNUM");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "HRT_MAX");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "AB_MAX");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_undertomb");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_strange");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_ability");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_thecurtain");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_cave");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_dkcave");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_climb");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_gold");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_pink");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_tree");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_deepdive");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_firecage");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_ghost");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_eye");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_skysand");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_rainbowdive");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_library");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "c_highland");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "mus_area1");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "mus_area2");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "mus_area3");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "mus_area4");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "mus_area5");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "mus_area6");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "mus_area7");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "directory");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "snd_break2");
+quickmember_variable(&globals_scope,jdi::builtin_type__int, "snd_button");
+//  for (int i = 0; i < es->constantCount; i++)
+//    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->constants[i].name);
+//END TEMP
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.

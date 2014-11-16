@@ -79,10 +79,47 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     wto << "}" << endl <<endl;
 
     wto << "namespace enigma_user {" << endl;
-    for (int i=0; i<es->constantCount; i++) {
+
+//TEMP - constants are broken.
+std::cerr <<"WRITING: " <<es->constantCount <<" constants\n";
+wto<<"  #define VERNUM 117\n";
+wto<<"  #define HRT_MAX 95\n";
+wto<<"  #define AB_MAX 24\n";
+wto<<"  #define c_undertomb make_color(130,130,30)\n";
+wto<<"  #define c_strange make_color(175,255,140)\n";
+wto<<"  #define c_ability make_color(64,64,255)\n";
+wto<<"  #define c_thecurtain make_color(85,120,125)\n";
+wto<<"  #define c_cave make_color(96,49,2)\n";
+wto<<"  #define c_dkcave make_color(64,33,1)\n";
+wto<<"  #define c_climb make_color(0,128,0)\n";
+wto<<"  #define c_gold make_color(249,190,70)\n";
+wto<<"  #define c_pink make_color(255,128,128)\n";
+wto<<"  #define c_tree make_color(225,116,6)\n";
+wto<<"  #define c_deepdive make_color(88,114,91)\n";
+wto<<"  #define c_firecage c_red\n";
+wto<<"  #define c_ghost make_color(82,48,81)\n";
+wto<<"  #define c_eye make_color(255,64,255)\n";
+wto<<"  #define c_skysand make_color(218,111,3)\n";
+wto<<"  #define c_rainbowdive make_color(192,255,255)\n";
+wto<<"  #define c_library make_color(138,140,62)\n";
+wto<<"  #define c_highland make_color(191,193,115)\n";
+wto<<"  #define mus_area1 mus_nightwalk\n";
+wto<<"  #define mus_area2 mus_grotto\n";
+wto<<"  #define mus_area3 mus_deeptower\n";
+wto<<"  #define mus_area4 mus_coldkeep\n";
+wto<<"  #define mus_area5 mus_skytown\n";
+wto<<"  #define mus_area6 mus_nightclimb\n";
+wto<<"  #define mus_area7 mus_farfall\n";
+wto<<"  #define directory \"BGs\"\n";
+wto<<"  #define snd_break2 snd_breakice\n";
+wto<<"  #define snd_button snd_land\n";
+
+/*    for (int i=0; i<es->constantCount; i++) {
       const Constant& con = es->constants[i];
       wto << "  #define " << con.name << " " << con.value << endl;
-    }
+    }*/
+//END TEMP
+
     wto << "}" << endl;
 
     wto << "//Default variable type: \"undefined\" or \"real\"" <<endl;
