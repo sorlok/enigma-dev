@@ -81,6 +81,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     wto << "namespace enigma_user {" << endl;
 
 //TEMP - constants are broken.
+//NOTE: Some of these should really be "const vars".
 std::cerr <<"WRITING: " <<es->constantCount <<" constants\n";
 wto<<"  #define VERNUM 117\n";
 wto<<"  #define HRT_MAX 95\n";
@@ -110,7 +111,7 @@ wto<<"  #define mus_area4 mus_coldkeep\n";
 wto<<"  #define mus_area5 mus_skytown\n";
 wto<<"  #define mus_area6 mus_nightclimb\n";
 wto<<"  #define mus_area7 mus_farfall\n";
-wto<<"  #define directory \"BGs\"\n";
+wto<<"  #define directory string(\"BGs\")\n";
 wto<<"  #define snd_break2 snd_breakice\n";
 wto<<"  #define snd_button snd_land\n";
 

@@ -28,20 +28,9 @@
 #define M_PI		3.14159265358979323846
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
   #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
     const enigma::background *const bck2d = enigma::backgroundstructarray[back];
   #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
     const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #else
   #define get_background(bck2d,back)\
@@ -70,7 +59,7 @@ namespace enigma_user
 
 void draw_background(int back, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-std::cerr <<"TEST: " <<back <<"\n";
+//std::cerr <<"TEST: " <<back <<"\n";
 	get_background(bck2d,back);
 
 	const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy;
@@ -84,7 +73,7 @@ std::cerr <<"TEST: " <<back <<"\n";
 
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
-std::cerr <<"TEST: " <<back <<"\n";
+//std::cerr <<"TEST: " <<back <<"\n";
 	get_background(bck2d, back);
 
 	const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy;
@@ -98,7 +87,7 @@ std::cerr <<"TEST: " <<back <<"\n";
 
 void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-std::cerr <<"TEST: " <<back <<"\n";
+//std::cerr <<"TEST: " <<back <<"\n";
 	get_background(bck2d, back);
 
 	gs_scalar tbw = bck2d->width/(gs_scalar)bck2d->texbordx, tbh = bck2d->height/(gs_scalar)bck2d->texbordy,
@@ -115,7 +104,7 @@ std::cerr <<"TEST: " <<back <<"\n";
 
 void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
-std::cerr <<"TEST: " <<back <<"\n";
+//std::cerr <<"TEST: " <<back <<" : " <<x <<"," <<y <<" : " <<xscale <<"," <<yscale <<" : " <<rot <<" : " <<color <<" : " <<alpha <<"\n";
     get_background(bck2d,back);
 
     rot *= M_PI/180;
@@ -146,7 +135,7 @@ std::cerr <<"TEST: " <<back <<"\n";
 
 void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
-std::cerr <<"TEST: " <<back <<"\n";
+//std::cerr <<"TEST: " <<back <<"\n";
 	get_background(bck2d,back);
 
 	const gs_scalar tbx=bck2d->texbordx, tby=bck2d->texbordy;
@@ -161,7 +150,7 @@ std::cerr <<"TEST: " <<back <<"\n";
 
 void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
-std::cerr <<"TEST: " <<back <<"\n";
+//std::cerr <<"TEST: " <<back <<"\n";
 	get_background(bck2d, back);
 
 	gs_scalar tbw = bck2d->width/(gs_scalar)bck2d->texbordx, tbh = bck2d->height/(gs_scalar)bck2d->texbordy,
@@ -180,7 +169,7 @@ std::cerr <<"TEST: " <<back <<"\n";
 
 void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
 {
-std::cerr <<"TEST: " <<back <<"\n";
+//std::cerr <<"TEST: " <<back <<"\n";
 	get_background(bck2d, back);
     const gs_scalar
       tbx = bck2d->texbordx,  tby = bck2d->texbordy,
@@ -207,7 +196,7 @@ std::cerr <<"TEST: " <<back <<"\n";
 
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-std::cerr <<"TEST: " <<back <<"\n";
+//std::cerr <<"TEST: " <<back <<"\n";
     get_background(bck2d,back);
     x = (x<0?0:bck2d->width)-fmod(x,bck2d->width);
     y = (y<0?0:bck2d->height)-fmod(y,bck2d->height);

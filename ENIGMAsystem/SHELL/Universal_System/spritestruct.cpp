@@ -257,6 +257,9 @@ namespace enigma
 
     void sprite_add_to_index(sprite *ns, string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap)
     {
+//TEMP: Fix
+if (imgnumb==0) { imgnumb = 1; }
+
         unsigned int width, height, fullwidth, fullheight;
 
         unsigned char *pxdata = image_load(filename, &width, &height, &fullwidth, &fullheight, false);

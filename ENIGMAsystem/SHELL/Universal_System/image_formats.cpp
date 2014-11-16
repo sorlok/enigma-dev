@@ -24,6 +24,8 @@
 #include <cstring>
 #include "lodepng.h"
 #include <stdlib.h>
+#include <iostream>
+#include <algorithm>
 using namespace std;
 #include "image_formats.h"
 
@@ -65,6 +67,15 @@ string image_get_format(string filename) {
 
 /// Generic all-purpose image loading call.
 unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+	//HACK: forward-slash, backslash
+	std::replace(filename.begin(), filename.end(), '\\', '/');
+   //HACK: we use lowercase extensions for now:
+   std::string prefix = filename.substr(0, filename.size()-3);
+   std::string suffix = filename.substr(filename.size()-3, 3);
+   std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
+   filename = prefix + suffix;
+
+std::cerr <<"Trying to load: " <<filename <<"\n";
 	if (format.compare(".png") == 0) {
 		return image_load_png(filename, width, height, fullwidth, fullheight, flipped);
 	} else if (format.compare(".bmp") == 0) {
