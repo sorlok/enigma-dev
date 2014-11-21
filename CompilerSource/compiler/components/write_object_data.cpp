@@ -22,6 +22,9 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <sstream>
+#include <list>
+#include <set>
 
 using namespace std;
 
@@ -60,6 +63,93 @@ inline string event_forge_group_code(int mainId, int id) {
 // modes: 0=run, 1=debug, 2=design, 3=compile
 enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
+
+namespace {
+
+//Sort a set of collision_objs in most-specific order.
+//Returns a set of blacklisted object IDs; any ID in this set MUST check each collision instance ID.
+set<int> sort_collisions(EnigmaStruct* es, const set<int>& allIds, vector<int>& collis_obj_ids) {
+//DEBUG
+//std::cerr <<"BEFORE: "; for (vector<int>::iterator vit = collis_obj_ids.begin(); vit != collis_obj_ids.end(); vit++) { std::cerr <<(*vit) <<","; } std::cerr <<"\n";
+//END DEBUG
+
+
+  //The first thing we need is a set of "leaf" nodes (objects that are parents of no-one).
+  //We also need the path from each leaf to each "root" (objects that have no parents).
+  map< int, list<int> > leaves; //e.g., "C" -> "C,B,A"
+  set<int> blacklist; //non-leaves.
+  int maxTrail = 0; //length of the maximum trail -1 
+  for (vector<int>::const_iterator it=collis_obj_ids.begin(); it!=collis_obj_ids.end(); it++) {
+    //Does an existing leaf candidate contain us?
+    if (blacklist.find(*it)!=blacklist.end()) { 
+      continue;
+    }
+
+    //Else, prepare a new candidate, blacklisting and removing parents as you go.
+    list<int> trail;
+    int candidate = *it;
+//std::cerr <<"Forming candidate list for: " <<*it <<"\n";
+    while (candidate >= 0) {
+//std::cerr <<"   " <<candidate <<"\n";
+      //Add, blacklist, remove.
+      //NOTE: We MUST add candidates, even if they are not checked for collisions, so that our
+      //      top-down algorithm doesn't mess up. There are other ways to do this, just be careful!
+      trail.push_back(candidate); 
+      blacklist.insert(candidate);
+      leaves.erase(candidate);
+
+      //Move up to your parent.
+      candidate = es->gmObjects[candidate].parentId;
+    }
+    leaves[*it] = trail;
+    maxTrail = std::max(static_cast<int>(trail.size())-1, maxTrail);
+  }
+
+  //Remove leaves from the blacklist IF none of their parents are checked.
+  for (map< int, list<int> >::const_iterator it=leaves.begin(); it!=leaves.end(); it++) {
+    blacklist.erase(it->first);
+    for (list<int>::const_iterator i2=it->second.begin(); i2!=it->second.end(); i2++) {
+      if ((*i2) != it->first && allIds.find(*i2) != allIds.end()) {
+        blacklist.insert(it->first);
+        break;
+      }
+    }
+  }
+
+  //We now iterate from maxTrail to 0, adding every object at that depth (and skipping non-tagged objects).
+//std::cerr <<"Now adding back in:\n";
+  collis_obj_ids.clear();
+  for (; maxTrail>=0; maxTrail--) {
+//std::cerr <<"  Level " <<maxTrail <<":\n";
+    for (map< int, list<int> >::iterator it=leaves.begin(); it!=leaves.end(); it++) {
+      if (static_cast<int>(it->second.size()) >= maxTrail+1) {
+        int candidate = it->second.front();
+//std::cerr <<"    cand: " <<candidate <<"\n";
+        it->second.pop_front();
+        if (allIds.find(candidate)!=allIds.end() && std::find(collis_obj_ids.begin(), collis_obj_ids.end(), candidate)==collis_obj_ids.end()) {
+          collis_obj_ids.push_back(candidate);
+
+          //Blacklist the parent if at least one child exists in this collision tree.
+          //That means parent AND child need to be checked for instance collisions.
+          //if (candidate != it->first) {
+          //  blacklist.insert(it->first);
+          //}
+        }
+      }
+    }
+  }
+
+//DEBUG
+//std::cerr <<"AFTER: "; for (vector<int>::iterator vit = collis_obj_ids.begin(); vit != collis_obj_ids.end(); vit++) { std::cerr <<*vit <<","; } std::cerr <<"\n";
+//END DEBUG
+
+  //Return the blacklist.
+  return blacklist;
+}
+
+} //End un-named namespace 
+
+
 typedef map<int, map<int, vector<int> > > evpairmap;
 int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, int mode)
 {
@@ -70,7 +160,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     wto << license;
     wto << "#include \"Universal_System/collisions_object.h\"\n";
     wto << "#include \"Universal_System/object.h\"\n\n";
-    wto << "#include <map>";
+    wto << "#include <map>\n";
+    wto << "#include <set>\n";
 
     // Write the script names
     wto << "// Script identifiers\n";
@@ -319,6 +410,11 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
                 evgroup[i->second->events[ii].mainId].push_back(ii);
             }
             wto << "    variant myevent_" << evname << "();\n    ";
+
+            //We may also need a "blacklisted" version. We could prune these, but it should be caught by the compiler as "dead code" if unused.
+            if (evname.find("collision")==0) {
+              wto << "    variant myevent_" << evname << "_with_blacklist(std::set<int>&);\n    ";
+            }
           }
            
           if  (i->second->events[ii].code != "" || event_has_default_code(i->second->events[ii].mainId,i->second->events[ii].id))
@@ -365,9 +461,63 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) {
             int mid = it->first;
             wto << "  void myevent_" << event_stacked_get_root_name(mid) << "()\n      {\n";
+
+            //Convert it->second into an array of IDs, for simplicity.
+            vector<int> ids;
             for (vector<int>::iterator vit = it->second.begin(); vit != it->second.end(); vit++) {
-              int id = i->second->events[*vit].id;
-              wto << event_forge_group_code(mid, id);
+              ids.push_back(i->second->events[*vit].id);
+            }
+
+            //We may also have to blacklist certain objects (currently only applies to collisions).
+            set<int> blacklist_obj_ids;
+
+            //Collision events must be handled in a particular order; that is, "most descriptive first". 
+            //So, if A is the parent of B and C, and E checks for collisions with all three, then 
+            //  instances of B and C must ONLY trigger collides(B) and collides(C), and any remaining
+            //  instances of A must ONLY trigger collides(A). I'm accomplishing this by sorting 
+            //  events, and then tagging instances for "conflicting" events. The other option is to 
+            //  only list the most-general events here (e.g., A), and then have the event collision
+            //  code do a BFS of its children. My approach is more efficient, as it removes a lot
+            //  of potentially (but not actually) conflicting events at compile time.
+#ifndef DISABLE_SORTED_COLLISIONS  //If this glitches out, defining this will disable it entirely.
+            if (event_stacked_get_root_name(mid) == "collision") {
+              set<int> allIds;
+              for (vector<int>::iterator itId = ids.begin(); itId != ids.end(); itId++) {
+                allIds.insert(*itId);
+              }
+              blacklist_obj_ids = sort_collisions(es, allIds, ids);
+            }
+#endif
+
+            //If *at least one* collision is blacklisted, create a blacklist for instance ids.
+            for (vector<int>::iterator itId = ids.begin(); itId != ids.end(); itId++) {
+              if (blacklist_obj_ids.find(*itId) != blacklist_obj_ids.end()) {
+                wto <<"        std::set<int> blacklist;\n";
+                break;
+              }
+            }
+
+            //Now continue writing the event.
+            //for (vector<int>::iterator vit = it->second.begin(); vit != it->second.end(); vit++) {
+//              int id = i->second->events[*vit].id;
+            for (vector<int>::iterator itId = ids.begin(); itId != ids.end(); itId++) {
+              int id = *itId;
+
+              //NOTE: This is really hacky; but we need a way to optionally blacklist instance IDs.
+              //      No need to disable this in case of error; if the blacklist is empty, it shouldn't do anything at all.
+              if (event_stacked_get_root_name(mid) == "collision" && blacklist_obj_ids.find(id)!=blacklist_obj_ids.end()) {
+                //Haaaaaack
+                std::stringstream msg1, msg2;
+                msg1 << "_collision_" <<id <<"()";
+                msg2 << "_collision_" <<id <<"_with_blacklist(blacklist)";
+                std::string resMsg = event_forge_group_code(mid, id);
+                size_t ind = resMsg.find(msg1.str());
+                wto <<resMsg.replace(ind, msg1.str().size(), msg2.str());
+              } else {
+                //In all other cases, just write it.
+                wto << event_forge_group_code(mid, id);
+              }
+
               if (setting::inherit_objects && parent != parsed_objects.end()) {
                 for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
                   evpairmap::iterator tt = evmap.find(her->second->id);
@@ -683,6 +833,28 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
             wto << event_get_suffix_code(mid, id) << endl;
           cout << "DBGMSG 4-5" << endl;
           wto << "\n  return 0;\n}\n";
+
+
+          //Special, hackish case for collision events with a blacklist.
+          if (evname.find("collision")==0) {
+            wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "_with_blacklist(std::set<int>& blacklisted)\n{\n  ";
+            if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
+              wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
+
+            //This will undoubtedly have to go into events.res somewhere:
+            wto << "for (enigma::iterator it = enigma::fetch_inst_iter_by_int(" <<id <<"); it; ++it) {int $$$internal$$$ = " <<id <<"; instance_other = *it;\n";
+            wto << "  if (blacklisted.find(instance_other->id)==blacklisted.end()) {\n";  //New code.
+            wto << "  if (enigma::place_meeting_inst(x,y,instance_other->id)) {if(enigma::glaccess(int(other))->solid && enigma::place_meeting_inst(x,y,instance_other->id)) x = xprevious, y = yprevious;\n";
+            wto << "  {\n";
+            wto << "  blacklisted.insert(instance_other->id);\n"; //New code.
+            print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto); //The event code!
+            wto << "  }\n";
+            wto << "  ;\n";
+            wto << "  if (enigma::glaccess(int(other))->solid) {x += hspeed; y += vspeed; if (enigma::place_meeting_inst(x, y, $$$internal$$$)) {x = xprevious; y = yprevious;}}}}}\n";
+
+            wto << "\n  return 0;\n}\n";
+          }
+
 
           if (defined_inherited) {
             wto << "#undef event_inherited\n";
