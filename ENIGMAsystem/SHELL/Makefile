@@ -61,12 +61,12 @@ ifeq ($(GMODE), Debug)
 	CXXFLAGS += -Wall -g -DDEBUG_MODE
 	CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
-	CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
-	LDFLAGS += -flto -s -O3
+	CXXFLAGS += -Wall -s -O2 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
+	CFLAGS += -Wall -s -O2 -flto -fno-exceptions -fdata-sections -ffunction-sections
+	LDFLAGS += -flto -s -O2
 else
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
-	CFLAGS += -Wall -s -O3 -fno-exceptions
+	CXXFLAGS += -Wall -s -O2 -fno-rtti -fno-exceptions
+	CFLAGS += -Wall -s -O2 -fno-exceptions
 endif
 
 ifeq ($(PLATFORM), Win32)
