@@ -162,6 +162,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     wto << "#include \"Universal_System/object.h\"\n\n";
     wto << "#include <map>\n";
     wto << "#include <set>\n";
+    wto << "#include <iostream>\n";
 
     // Write the script names
     wto << "// Script identifiers\n";
@@ -191,7 +192,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
     wto << "\n";
     wto << "namespace enigma\n{\n\n";
-    wto << "  extern std::map<int,inst_iter*> instance_deactivated_list;\n";
+    wto << "  object_basic* get_p_iter(pinstance_list_iterator);\n";
+
+    wto << "  extern std::map<int,object_basic*> instance_deactivated_list;\n";
     wto << "  extern objectstruct** objectdata;\n";
       wto << "  struct object_locals: event_parent";
         for (unsigned i = 0; i < parsed_extensions.size(); i++)
@@ -570,13 +573,15 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
           //This is the actual call to remove the current instance from all linked records before destroying it.
           wto << "\n    void unlink()\n    {\n";
-          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
+          wto << "      std::cerr <<\"OBJ::unlink: \" <<enigma::get_p_iter(ENOBJ_ITER_me) <<\"\\n\";\n";
+          wto << "      instance_iter_queue_for_destroy(this); // Queue for delete while we're still valid\n";
           wto << "      if (enigma::instance_deactivated_list.erase(id)==0) {\n";
           wto << "        //If it's not in the deactivated list, then it's active (so deactivate it).\n";
           wto << "        deactivate();\n";
           wto << "      }\n";
           wto << "    }\n\n";
           wto << "    void deactivate()\n    {\n";
+          wto << "      std::cerr <<\"OBJ::deact: \" <<enigma::get_p_iter(ENOBJ_ITER_me) <<\"\\n\";\n";
           if (!setting::inherit_objects || !has_parent) { 
             wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
@@ -599,6 +604,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
             wto << "      enigma::event_" << event_stacked_get_root_name(it->first) << "->unlink(ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ");\n";
           }
+          wto << "      std::cerr <<\"OBJ::deact2: \" <<enigma::get_p_iter(ENOBJ_ITER_me) <<\"\\n\";\n";
           wto << "    }\n    ";
 
 

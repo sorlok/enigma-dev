@@ -20,9 +20,11 @@
 #include <map>
 #include <deque>
 #include <set>
+#include <cassert>
 #include <math.h>
 #include <vector>
 #include <string>
+#include <iostream>
 #include "var4.h"
 #include "reflexive_types.h"
 #include <stdio.h>
@@ -53,28 +55,117 @@ namespace enigma
     set<iterator*> central_iterator_cache;
     typedef set<iterator*>::iterator central_iterator_cache_iterator;
 
-    object_basic* iterator::operator*() { return it->inst; }
-    object_basic* iterator::operator->() { return it->inst; }
+    object_basic* iterator::operator*() { 
+      if (iter) {
+        return iter->inst;
+      } else {
+        return inst;
+      }
+    }
+    object_basic* iterator::operator->() { 
+      if (iter) {
+        return iter->inst;
+      } else {
+        return inst;
+      }
+    }
 
     void iterator::addme() { central_iterator_cache.insert(this); }
-    inst_iter* iterator::copy(const iterator& other, inst_iter& temp_iter) { if (other.it == &other.temp_iter) { return &temp_iter; temp_iter = other.temp_iter; } else { return other.it; } };
 
-    iterator::operator bool() { return it; }
-    iterator &iterator::operator++()    { it = it->next; return *this; }
-    iterator  iterator::operator++(int) { iterator ret(*this); it = it->next; return ret; }
-    iterator &iterator::operator--()    { it = it->prev; return *this; }
-    iterator  iterator::operator--(int) { iterator ret(*this); it = it->prev; return ret; }
+    //inst_iter* iterator::copy(const iterator& other/*, inst_iter& temp_iter*/) { /*if (other.it == &other.temp_iter) { return &temp_iter; } else {*/ return other.it; /*}*/ };
 
-    iterator &iterator::operator=(const iterator& other) { it = copy(other, temp_iter); return *this; }
-    iterator &iterator::operator=(inst_iter* niter)      { it = niter; return *this; }
-    iterator &iterator::operator=(object_basic* object)  { temp_iter.next = temp_iter.prev = NULL; temp_iter.inst = object; it = &temp_iter; return *this; }
+    iterator::operator bool() { 
+      return iter ? true : inst ? true : false;
+    }
+
+    iterator &iterator::operator++()    {
+      if (iter) {
+        iter = iter->next;
+      } else if (inst) {
+        inst = NULL;
+      }
+
+      return *this;
+      //it = it->next; return *this; 
+    }
+
+    iterator  iterator::operator++(int) { 
+      iterator ret(*this); 
+      //it = it->next; return ret; 
+      if (iter) {
+        iter = iter->next;
+      } else if (inst) {
+        inst = NULL;
+      }
+      return ret;
+    }
+
+    iterator &iterator::operator--()    { 
+      if (iter) {
+        iter = iter->prev;
+      } else if (inst) {
+        inst = NULL;
+      }
+      return *this;
+      //it = it->prev; return *this; 
+    }
+
+    iterator  iterator::operator--(int) { 
+      iterator ret(*this); 
+      //it = it->prev; return ret; 
+      if (iter) {
+        iter = iter->prev;
+      } else if (inst) {
+        inst = NULL;
+      }
+      return ret;
+    }
+
+    iterator &iterator::operator=(const iterator& other) { 
+      iter = other.iter;
+      inst = other.inst;
+      return *this;
+      //it = copy(other/*, temp_iter*/); return *this; 
+    }
+
+    iterator &iterator::operator=(inst_iter* niter)      { 
+      iter = niter;
+      inst = NULL;
+      return *this;
+      //it = niter; return *this; 
+    }
+
+    iterator &iterator::operator=(object_basic* object)  { 
+      iter = NULL;
+      inst = object;
+      return *this;
+      //temp_iter.next = temp_iter.prev = NULL; temp_iter.inst = object; it = &temp_iter; return *this; 
+    }
     
-    iterator::iterator(const iterator& other): it(copy(other, temp_iter)) { addme(); }
-    iterator::iterator(inst_iter* iter): it(iter) { addme(); }
-    iterator::iterator(object_basic* ob): temp_iter(ob, NULL, NULL), it(&temp_iter)  { }
-    iterator::iterator(): it(NULL)  { }
+    iterator::iterator(const iterator& other) : iter(other.iter), inst(other.inst)
+      //it(copy(other/*, temp_iter*/)) { addme(); }
+    { addme(); }
+
+    iterator::iterator(inst_iter* iter) : iter(iter), inst(NULL)
+      //it(iter) { addme(); }
+    { addme(); }
+
+    iterator::iterator(object_basic* ob) : iter(NULL), inst(ob)
+      //temp_iter(ob, NULL, NULL), it(&temp_iter)  
+    {}
+
+    iterator::iterator() : iter(NULL), inst(NULL)
+    {}
+
     iterator:: ~iterator() {
-      central_iterator_cache.erase(this);
+      central_iterator_cache.erase(this); //Again, seems like it doesn't work.
+    }
+
+    void iterator::update_for_destroy(const inst_iter* dd) {
+      if (iter && iter->next == dd)
+        iter->next = dd->next;
+      else if (iter && iter->prev == dd)
+        iter->prev = dd->prev;
     }
 
     void update_iterators_for_destroy(const inst_iter* dd)
@@ -82,10 +173,7 @@ namespace enigma
       for (central_iterator_cache_iterator it = central_iterator_cache.begin();
            it != central_iterator_cache.end(); ++it)
       {
-        if ((*it)->it->next == dd)
-          (*it)->it->next = dd->next;
-        else if ((*it)->it->prev == dd)
-          (*it)->it->prev = dd->prev;
+        (*it)->update_for_destroy(dd);
       }
     }
 
@@ -120,6 +208,7 @@ namespace enigma
 
   void unlink_object_id_iter(inst_iter* which, int oid)
   {
+std::cerr <<"unlink_object_id_iter: " <<oid <<"\n";
     if (which->prev) which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
     objectid_base *a = objects + oid;
@@ -137,7 +226,7 @@ namespace enigma
 
   // This is the all-inclusive, centralized list of instances.
   map<int,inst_iter*> instance_list;
-  map<int,inst_iter*> instance_deactivated_list;
+  map<int,object_basic*> instance_deactivated_list;
   typedef map<int,inst_iter*>::iterator iliter;
   typedef pair<int,inst_iter*> inode_pair;
     
@@ -204,6 +293,7 @@ namespace enigma
 
   iterator fetch_inst_iter_by_int(int x)
   {
+std::cerr <<"fetch_inst_iter_by_int(" <<x <<")\n";
     using namespace enigma_user;
 
     if (x < 0) switch (x) // Keyword-based lookup
@@ -217,11 +307,19 @@ namespace enigma
          default:  return iterator();
     }
 
-    if (x < 100000) // Object-index-based lookup
+    if (x < 100000) { // Object-index-based lookup
+std::cerr <<"   fetch_ret1: " <<objects[x].next <<"\n";
       return objects[x].next;
+    }
 
     // ID-based lookup
     iliter a = instance_list.find(x);
+//std::cerr <<"  returning: " <<(a != instance_list.end()) <<"\n";
+//std::cerr <<"       test: " <<a->second->inst <<"\n";
+//std::cerr <<"       test: " <<a->second.it <<"\n";
+    iterator ret = iterator(a->second->inst);
+//std::cerr <<"       test: " <<ret.it <<"\n";
+std::cerr <<"   fetch_ret2: " <<(a != instance_list.end()) <<"\n";
     return a != instance_list.end() ? iterator(a->second->inst) : iterator();
   }
   iterator fetch_inst_iter_by_id(int x)
@@ -239,9 +337,9 @@ namespace enigma
       return iterator();
 
     //Check if it's a deactivated instance first.
-    std::map<int,enigma::inst_iter*>::iterator rIt = enigma::instance_deactivated_list.find(x);
+    std::map<int,enigma::object_basic*>::iterator rIt = enigma::instance_deactivated_list.find(x);
     if (rIt!=enigma::instance_deactivated_list.end()) {
-      return iterator(((enigma::object_basic*)(rIt->second->inst)));
+      return iterator(rIt->second);
     }
 
     //Else, it's still live (or was null). Use normal dispatch.
@@ -261,6 +359,7 @@ namespace enigma
   //Link in an instance
   pinstance_list_iterator link_instance(object_basic* who)
   {
+std::cerr <<"Linking instance for: " <<who <<"\n";
     inst_iter *ins = new inst_iter(who);
     instance_id.push_back(who->id);
     pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
@@ -277,33 +376,45 @@ namespace enigma
     else ins->prev = NULL; // Found nothing.
 
     iliter in = it.first; in++; // Find next iterator
-    if (in != instance_list.end()) // If it exists
+    if (in != instance_list.end()) 
+    {
       ins->next = in->second, // Link this to next instance
       in->second->prev = ins; // Link next to this
+    }
     else ins->next = NULL;
-    return new winstance_list_iterator(it.first);
+    winstance_list_iterator* res = new winstance_list_iterator(it.first);
+std::cerr <<"     returning: " <<res->w->second->inst <<"\n";
+    return res;
   }
   inst_iter *link_obj_instance(object_basic* who, int oid)
   {
+std::cerr <<"     Adding OID: " <<oid <<"\n";
     objects[oid].count++;
     return objects[oid].add_inst(who);
   }
 
-  void instance_iter_queue_for_destroy(pinstance_list_iterator whop)
+object_basic* get_p_iter(pinstance_list_iterator whop) { return whop->w->second->inst; }
+
+  void instance_iter_queue_for_destroy(object_basic* obj)
   {
-    enigma::cleanups.insert((object_basic*)whop->w->second->inst);
+//assert(false);
+std::cerr <<"Queueing for destroy: " <<obj <<"\n";
+    enigma::cleanups.insert(obj);
     enigma::instancecount--;
     enigma_user::instance_count--;
   }
   void dispose_destroyed_instances()
   {
-    for (set<object_basic*>::iterator i = cleanups.begin(); i != cleanups.end(); i++)
+    for (set<object_basic*>::iterator i = cleanups.begin(); i != cleanups.end(); i++) {
+std::cerr <<"Cleaning up: " <<(*i) <<"\n";
       delete (*i);
+    }
     cleanups.clear();
   }
   void unlink_main(instance_list_iterator who)
   {
     inst_iter *a = who->second;
+std::cerr <<"Unlinking instance for: " <<a->inst <<"\n";
     if (a->prev) a->prev->next = a->next;
     if (a->next) a->next->prev = a->prev;
     instance_list.erase(who);
@@ -312,6 +423,7 @@ namespace enigma
   void unlink_main(pinstance_list_iterator whop)
   {
     inst_iter *a = whop->w->second;
+std::cerr <<"Unlinking instance for: " <<a->inst <<"\n";
     if (a->prev) a->prev->next = a->next;
     if (a->next) a->next->prev = a->prev;
     instance_list.erase(whop->w);

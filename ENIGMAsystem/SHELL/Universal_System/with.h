@@ -34,17 +34,27 @@ enigma::instance_event_iterator; enigma::instance_event_iterator = enigma::insta
 #define with_room_inst(x) for (enigma::with_iter ENIGMA_WITHITER(enigma::fetch_roominst_iter_by_id(x),enigma::instance_event_iterator->inst); \
 enigma::instance_event_iterator; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
 
+#include <iostream>
 
 namespace enigma
 {
   struct with_iter
   {
+    inst_iter temp_inst_iter; //TODO: safe???
+
     iterator_level *my_il;
     iterator my_iterator;
     with_iter(enigma::iterator nt, object_basic* other): my_iterator(nt)
     {
+std::cerr <<"with() constructor\n";
+std::cerr <<"with() -- nt is valid? " <<(nt?"yes":"no") <<"\n";
+std::cerr <<"with() -- nt deref " <<(*nt) <<"\n";
+      temp_inst_iter = inst_iter(*nt, nt.next(), nt.prev());
+
       il_top = my_il = new iterator_level(instance_event_iterator,instance_other,il_top);
-      instance_event_iterator = nt.it;
+      //instance_event_iterator = nt.it;
+      instance_event_iterator = nt ? &temp_inst_iter : 0;
+std::cerr <<"with() -- event_iter is valid? " <<(instance_event_iterator?"yes":"no") <<"\n";
       instance_other = other;
     }
     ~with_iter()

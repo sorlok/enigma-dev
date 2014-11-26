@@ -28,6 +28,7 @@
 #include "PRECimpl.h"
 #include <cmath>
 #include <utility>
+#include <iostream>
 
 #define M_PI		3.14159265358979323846
 
@@ -282,6 +283,13 @@ static bool precise_collision_ellipse(int intersection_left, int intersection_ri
 
 enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, bool notme, double x, double y)
 {
+//std::cerr <<"COLLIDE: " <<(enigma::instance_event_iterator?"yes":"no") <<"\n";
+//std::cerr <<"       : " <<enigma::instance_event_iterator->inst <<"\n";
+
+    //VERY TEMP; this SHOULD actually return something in the roominst case.
+    if (!enigma::instance_event_iterator->inst) { return NULL; }
+
+
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
 
     //If instance cannot collide with anything, stop.

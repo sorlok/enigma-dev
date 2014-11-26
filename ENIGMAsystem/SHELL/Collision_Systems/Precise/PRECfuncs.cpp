@@ -28,6 +28,7 @@
 #include "../General/CSfuncs.h"
 #include <limits>
 #include <cmath>
+#include <iostream>
 #include "Universal_System/instance.h"
 
 #define M_PI		3.14159265358979323846
@@ -519,7 +520,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
 
 }
 
-typedef std::pair<int,enigma::inst_iter*> inode_pair;
+typedef std::pair<int,enigma::object_basic*> inode_pair;
 
 namespace enigma_user
 {
@@ -542,16 +543,17 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
             inst->deactivate();
-            enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+std::cerr <<"Inserting[3] : " <<(*it) <<"\n";
+            enigma::instance_deactivated_list.insert(inode_pair((*it)->id,*it));
         }
     }
 }
 
 void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool inside) {
-    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
 
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second));
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) {//no sprite/mask then no collision
             ++iter;
@@ -624,7 +626,8 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
             if (inside)
             {
                 inst->deactivate();
-                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+std::cerr <<"Inserting[4] : " <<(*it) <<"\n";
+                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,*it));
             }
         }
         else
@@ -632,7 +635,8 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
             if (!inside)
             {
                 inst->deactivate();
-                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+std::cerr <<"Inserting[5] : " <<(*it) <<"\n";
+                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,*it));
             }
         }
     }
@@ -640,9 +644,9 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
 
 void instance_activate_circle(int x, int y, int r, bool inside)
 {
-    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+        enigma::object_collisions* const inst = (enigma::object_collisions*)iter->second;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
             ++iter;

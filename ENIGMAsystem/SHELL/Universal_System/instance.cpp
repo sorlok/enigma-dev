@@ -29,9 +29,11 @@
 #include <map>
 #include <math.h>
 #include <string>
+#include <cassert>
 //#include "reflexive_types.h"
 //#include "EGMstd.h"
 #include "object.h"
+#include <iostream>
 
 #include "instance_system.h"
 #include "instance.h"
@@ -43,7 +45,7 @@ namespace enigma
   int destroycalls = 0, createcalls = 0;
 }
 
-typedef std::pair<int,enigma::inst_iter*> inode_pair;
+typedef std::pair<int,enigma::object_basic*> inode_pair;
 
 namespace enigma_user
 {
@@ -52,31 +54,39 @@ void instance_deactivate_all(bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
 
+std::cerr <<"Deactivating : " <<(*it) <<"\n";
         ((enigma::object_basic*)*it)->deactivate();
-        enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+        enigma::instance_deactivated_list.insert(inode_pair((*it)->id,*it));
     }
 }
 
 void instance_activate_all() {
 
-    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
-        ((enigma::object_basic*)(iter->second->inst))->activate();
+std::cerr <<"Activating: " <<iter->second <<"\n";
+//std::cerr <<"    : " <<iter->second->inst <<"\n";
+//std::cerr <<"    : " <<((enigma::object_basic*)(iter->second)) <<"\n";
+        iter->second->activate();
+//std::cerr <<"    PASS\n";
         enigma::instance_deactivated_list.erase(iter++);
     }
 }
 
 void instance_deactivate_object(int obj) {
+std::cerr <<"instance_deactivate_object()\n";
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it) {
         ((enigma::object_basic*)*it)->deactivate();
-        enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+std::cerr <<"Deactivating: " <<(*it) <<"\n";
+//assert(false);
+        enigma::instance_deactivated_list.insert(inode_pair((*it)->id,*it));
     }
 }
 
 void instance_activate_object(int obj) {
-    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
-        enigma::object_basic* const inst = ((enigma::object_basic*)(iter->second->inst));
+        enigma::object_basic* const inst = iter->second;
         if (obj == all || (obj < 100000? inst->object_index == obj : inst->id == unsigned(obj))) {
             inst->activate();
             enigma::instance_deactivated_list.erase(iter++);
@@ -101,14 +111,21 @@ void instance_destroy(int id, bool dest_ev)
 void instance_destroy()
 {
   enigma::object_basic* const a = enigma::instance_event_iterator->inst;
+std::cerr <<"Destroying: " <<a <<"\n";
   if (enigma::cleanups.find(a) == enigma::cleanups.end()) {
+std::cerr <<"   cust_dest: " <<a <<" is: " <<enigma::instance_event_iterator->inst <<"\n";
     enigma::instance_event_iterator->inst->myevent_destroy();
-    if (enigma::cleanups.find(a) == enigma::cleanups.end())
+    if (enigma::cleanups.find(a) == enigma::cleanups.end()) {
+std::cerr <<"      unlink: " <<a <<" is: " <<enigma::instance_event_iterator->inst <<"\n";
         enigma::instance_event_iterator->inst->unlink();
-    if (enigma::cleanups.find(a) == enigma::cleanups.end())
-    printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!", (void*)a);
-    if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst)
-    printf("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n", (void*)a, (void*)(enigma::object_basic*)enigma::instance_event_iterator->inst);
+    }
+    if (enigma::cleanups.find(a) == enigma::cleanups.end()) {
+      printf("BIG ERROR %p ISN'T ON THE STACK!\n", (void*)a);
+//assert(false);
+    }
+    if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst) {
+      printf("BIG ERROR! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n", (void*)a, (void*)(enigma::object_basic*)enigma::instance_event_iterator->inst);
+    }
   }
 }
 

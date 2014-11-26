@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <iostream>
+
 namespace enigma
 {
   void instance_change_inst(int obj, bool perf, object_graphics* inst)
@@ -88,6 +90,7 @@ namespace enigma_user
   {
       int idn = enigma::maxid++;
     enigma::object_basic* ob;
+std::cerr <<"instance_create(): " <<"(switching)" <<"\n";
       switch((int)object)
       {
         #define NEW_OBJ_PREFIX ob =
@@ -98,6 +101,7 @@ namespace enigma_user
           #endif
         return -1;
     }
+std::cerr <<"instance_create(): " <<ob <<"\n";
     ob->myevent_create();
     return idn;
   }

@@ -23,10 +23,9 @@
 #include "instance_system_base.h"
 
 namespace enigma {
+  //An iterator can represent *either* an object instance (object_basic) *or* a series of them (inst_iter).
+  //It allows iterating over them in the same manner.
   struct iterator {
-    inst_iter temp_iter;
-    struct inst_iter* it;
-    
     operator bool();
     object_basic* operator*();
     object_basic* operator->();
@@ -46,10 +45,19 @@ namespace enigma {
     iterator();
     
     ~iterator();
+
+    inline inst_iter* next() { return iter ? iter->next : NULL; }
+    inline inst_iter* prev() { return iter ? iter->prev : NULL; }
+
+    void update_for_destroy(const inst_iter*);
     
     private: 
       void addme();
-      static inst_iter* copy(const iterator& other, inst_iter& temp_iter);
+      //static inst_iter* copy(const iterator& other/*, inst_iter& temp_iter*/);
+
+      //inst_iter temp_iter;
+      inst_iter* iter;    //If non-null, this iterator wraps an inst_iter.
+      object_basic* inst; //Else, assume it wraps on object_basic.
   };
   
   void update_iterators_for_destroy(const inst_iter*);
