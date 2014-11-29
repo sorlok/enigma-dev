@@ -60,6 +60,9 @@ namespace enigma
       object_planar();
       object_planar(unsigned, int);
       virtual ~object_planar();
+
+    //TODO: Where does this go?
+    virtual variant myevent_pathend();
   };
 
   void propagate_locals(object_planar*);

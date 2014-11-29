@@ -40,6 +40,8 @@
 
 namespace enigma
 {
+  variant object_planar::myevent_pathend() { return 1; }
+
   object_planar::object_planar()
   {
     hspeed.vspd  = &vspeed.rval.d;
