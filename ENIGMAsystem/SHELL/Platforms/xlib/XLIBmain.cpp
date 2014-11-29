@@ -56,7 +56,7 @@ namespace enigma
   extern int windowWidth, windowHeight;
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
-  
+
   void (*WindowResizedCallback)();
   XVisualInfo* CreateVisualInfo();
   void EnableDrawing();
@@ -147,7 +147,6 @@ namespace enigma
 
           //NOTE: This will lead to a loop, and it seems superfluous.
           //enigma::setwindowsize();
-          
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
           }
@@ -264,7 +263,7 @@ int main(int argc,char** argv)
 
     // any normal person would know that this should be deleted but the OpenGL bridge does not want it deleted, please beware
     XVisualInfo* vi = enigma::CreateVisualInfo();
-    
+
     // Window event listening and coloring
     XSetWindowAttributes swa;
     swa.border_pixel = 0;
@@ -380,12 +379,12 @@ int main(int argc,char** argv)
             if(handleEvents() > 0)
                 goto end;
 
-        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
           if (enigma::pausedSteps < 1) {
             enigma::pausedSteps += 1;
           } else {
-            usleep(100000); 
-            continue; 
+            usleep(100000);
+            continue;
           }
         }
 

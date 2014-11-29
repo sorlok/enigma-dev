@@ -131,12 +131,12 @@ namespace enigma
 
       instance->speed.rval.d = instance->speed.rval.d < 0? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d) :
       hypot(instance->hspeed.rval.d, instance->vspeed.rval.d);
-      if (fabs(instance->speed.rval.d) > 1e-12)
-      instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI))
-      + (instance->speed.rval.d < 0?  180 : 360), 360);
+      if (fabs(instance->speed.rval.d) > 1e-12){
+        instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI))
+        + (instance->speed.rval.d < 0?  180 : 360), 360);
+      }
 
     }
-
     instance->x += instance->hspeed.rval.d;
     instance->y += instance->vspeed.rval.d;
   }

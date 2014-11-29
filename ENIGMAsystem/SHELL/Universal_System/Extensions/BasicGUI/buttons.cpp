@@ -29,7 +29,10 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "styles.h"
 #include "skins.h"
+#include "groups.h"
+#include "toggles.h"
 #include "buttons.h"
 #include "include.h"
 #include "common.h"
@@ -41,34 +44,33 @@ namespace gui
 
 	extern int gui_bound_skin;
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
+	extern unordered_map<unsigned int, gui_style> gui_styles;
+  extern unordered_map<unsigned int, gui_group> gui_groups;
+  extern unordered_map<unsigned int, gui_toggle> gui_toggles;
 	extern unsigned int gui_skins_maxid;
+	extern unsigned int gui_style_button;
 
 	extern bool windowStopPropagation;
 
 	//Implements button class
-	void gui_button::reset(){
-		text = "", state = 0, sprite = sprite_hover = sprite_active = sprite_on = sprite_on_hover = -1;
-		active = false;
-		togglable = false;
-		callback = -1;
-		visible = true;
-		font_styles[0].halign = font_styles[1].halign = font_styles[2].halign = font_styles[3].halign = font_styles[4].halign = enigma_user::fa_center;
-		font_styles[0].valign = font_styles[1].valign = font_styles[2].valign = font_styles[3].valign = font_styles[4].valign = enigma_user::fa_middle;
-	}
-
 	gui_button::gui_button(){
-	  parent_id = -1;
-		reset();
+	  style_id = gui_style_button; //Default style
+	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_center);
+    enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
 	}
 
 	//Update all possible button states (hover, click, toggle etc.)
 	void gui_button::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-		if (box.point_inside(tx-ox,ty-oy)){
+		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false){
       gui::windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
-				state = enigma_user::gui_state_active;
+        if (active == false){
+          state = enigma_user::gui_state_active;
+        }else{
+          state = enigma_user::gui_state_on_active;
+        }
 			}else{
-				if (state != enigma_user::gui_state_active){
+				if (state != enigma_user::gui_state_active && state != enigma_user::gui_state_on_active){
 					if (active == false){
 						state = enigma_user::gui_state_hover;
 					}else{
@@ -92,6 +94,14 @@ namespace gui
 							state = enigma_user::gui_state_hover;
 						}else{
 							state = enigma_user::gui_state_on_hover;
+							if (group_id != -1){ //Groups disable any other active element
+                for (const auto &b : gui::gui_groups[group_id].group_buttons){
+                  if (b != id) { gui_buttons[b].active = false; }
+                }
+                for (const auto &t : gui::gui_groups[group_id].group_toggles){
+                  gui_toggles[t].active = false;
+                }
+							}
 						}
 					}
 				}
@@ -108,65 +118,31 @@ namespace gui
 
 	void gui_button::draw(gs_scalar ox, gs_scalar oy){
 		//Draw button
-		switch (state){
-			case enigma_user::gui_state_default: //Default off
-				if (sprite!=-1){
-					enigma_user::draw_sprite_padded(sprite,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-			break;
-			case enigma_user::gui_state_hover: //Default off hover
-				if (sprite_hover!=-1){
-					enigma_user::draw_sprite_padded(sprite_hover,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-			break;
-			case enigma_user::gui_state_active: //Default active
-				if (sprite_active!=-1){
-					enigma_user::draw_sprite_padded(sprite_active,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-			break;
-			case enigma_user::gui_state_on: //Default on
-				if (sprite_on!=-1){
-					enigma_user::draw_sprite_padded(sprite_on,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-			break;
-			case enigma_user::gui_state_on_hover: //Default on hover
-				if (sprite_on_hover!=-1){
-					enigma_user::draw_sprite_padded(sprite_on_hover,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-			break;
+    if (gui::gui_styles[style_id].sprites[state] != -1){
+      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
 		}
 
 		//Draw text
-		font_styles[state].use();
-		enigma_user::draw_text(ox + font_styles[state].textx,oy + font_styles[state].texty,text);
+		gui::gui_styles[style_id].font_styles[state].use();
+
+    gs_scalar textx = 0.0, texty = 0.0;
+    switch (gui::gui_styles[style_id].font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+gui::gui_styles[style_id].padding.left; break;
+      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+      case enigma_user::fa_right: textx = box.x+box.w-gui::gui_styles[style_id].padding.right; break;
+    }
+
+    switch (gui::gui_styles[style_id].font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+gui::gui_styles[style_id].padding.top; break;
+      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-gui::gui_styles[style_id].padding.bottom; break;
+    }
+
+		enigma_user::draw_text(ox + textx,oy + texty,text);
 	}
 
 	void gui_button::update_text_pos(int state){
-		if (state == -1){
-			update_text_pos(enigma_user::gui_state_default);
-			update_text_pos(enigma_user::gui_state_hover);
-			update_text_pos(enigma_user::gui_state_active);
-			update_text_pos(enigma_user::gui_state_on);
-			update_text_pos(enigma_user::gui_state_on_hover);
-		}
-
-		font_style* style = &font_styles[state];
-
-		if (style->halign == enigma_user::fa_left){
-			style->textx = box.x+padding.left;
-		}else if (style->halign == enigma_user::fa_center){
-			style->textx = box.x+box.w/2.0;
-		}else if (style->halign == enigma_user::fa_right){
-			style->textx = box.x+box.w-padding.right;
-		}
-
-		if (style->valign == enigma_user::fa_top){
-			style->texty = box.y+padding.top;
-		}else if (style->valign == enigma_user::fa_middle){
-			style->texty = box.y+box.h/2.0;
-		}else if (style->valign == enigma_user::fa_bottom){
-			style->texty = box.y+box.h-padding.bottom;
-		}
+	  //gui::gui_styles[style_id].update_text_pos(box, state);
 	}
 }
 
@@ -191,10 +167,7 @@ namespace enigma_user
 		}
 		gui::gui_buttons[gui::gui_buttons_maxid].visible = true;
 		gui::gui_buttons[gui::gui_buttons_maxid].id = gui::gui_buttons_maxid;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.x = x;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.y = y;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.w = w;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.h = h;
+		gui::gui_buttons[gui::gui_buttons_maxid].box.set(x, y, w, h);
 		gui::gui_buttons[gui::gui_buttons_maxid].text = text;
 		gui::gui_buttons[gui::gui_buttons_maxid].update_text_pos();
 		return (gui::gui_buttons_maxid++);
@@ -213,98 +186,23 @@ namespace enigma_user
 		gui::gui_buttons[id].box.y = y;
 	}
 
-	void gui_button_set_font(int id, int state, int font){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_default].font = font;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_hover].font = font;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_active].font = font;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on].font = font;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on_hover].font = font;
-		}else{
-			gui::gui_buttons[id].font_styles[state].font = font;
-		}
-	}
-
-	void gui_button_set_font_halign(int id, int state, unsigned int halign){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_default].halign = halign;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_hover].halign = halign;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_active].halign = halign;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on].halign = halign;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on_hover].halign = halign;
-			gui::gui_buttons[id].update_text_pos();
-		}else{
-			gui::gui_buttons[id].font_styles[state].halign = halign;
-			gui::gui_buttons[id].update_text_pos(state);
-		}
-	}
-
-	void gui_button_set_font_valign(int id, int state, unsigned int valign){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_default].valign = valign;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_hover].valign = valign;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_active].valign = valign;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on].valign = valign;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on_hover].valign = valign;
-			gui::gui_buttons[id].update_text_pos();
-		}else{
-			gui::gui_buttons[id].font_styles[state].valign = valign;
-			gui::gui_buttons[id].update_text_pos(state);
-		}
-	}
-
-	void gui_button_set_font_color(int id, int state, int color){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_default].color = color;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_hover].color = color;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_active].color = color;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on].color = color;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on_hover].color = color;
-		}else{
-			gui::gui_buttons[id].font_styles[state].color = color;
-		}
-	}
-
-	void gui_button_set_font_alpha(int id, int state, gs_scalar alpha){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_default].alpha = alpha;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_hover].alpha = alpha;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_active].alpha = alpha;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on].alpha = alpha;
-			gui::gui_buttons[id].font_styles[enigma_user::gui_state_on_hover].alpha = alpha;
-		}else{
-			gui::gui_buttons[id].font_styles[state].alpha = alpha;
-		}
-	}
-
-	void gui_button_set_sprite(int id, int state, int sprid){
-		switch (state){
-			case enigma_user::gui_state_default: gui::gui_buttons[id].sprite = sprid; break;
-			case enigma_user::gui_state_hover: gui::gui_buttons[id].sprite_hover = sprid; break;
-			case enigma_user::gui_state_active: gui::gui_buttons[id].sprite_active = sprid; break;
-			case enigma_user::gui_state_on: gui::gui_buttons[id].sprite_on = sprid; break;
-			case enigma_user::gui_state_on_hover: gui::gui_buttons[id].sprite_on_hover = sprid; break;
-		}
-	}
-
-	void gui_button_set_size(int id, gs_scalar w, gs_scalar h){
+  void gui_button_set_size(int id, gs_scalar w, gs_scalar h){
 		gui::gui_buttons[id].box.w = w;
 		gui::gui_buttons[id].box.h = h;
 		gui::gui_buttons[id].update_text_pos();
 	}
 
-	void gui_button_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
-		gui::gui_buttons[id].padding.set(left,top,right,bottom);
-		gui::gui_buttons[id].update_text_pos();
-	}
-
-	void gui_button_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
-		gui::gui_buttons[id].border.set(left,top,right,bottom);
-	}
-
 	void gui_button_set_callback(int id, int script_id){
 		gui::gui_buttons[id].callback = script_id;
 	}
+
+  void gui_button_set_style(int id, int style_id){
+    gui::gui_buttons[id].style_id = (style_id != -1? style_id : gui::gui_style_button);
+  }
+
+  int gui_button_get_style(int id){
+    return gui::gui_buttons[id].style_id;
+  }
 
 	int gui_button_get_state(int id){
 		return gui::gui_buttons[id].state;
@@ -312,6 +210,10 @@ namespace enigma_user
 
 	bool gui_button_get_active(int id){
 		return gui::gui_buttons[id].active;
+	}
+
+  void gui_button_set_active(int id, bool active){
+		gui::gui_buttons[id].active = active;
 	}
 
 	void gui_button_set_togglable(int id, bool togglable){
@@ -340,11 +242,10 @@ namespace enigma_user
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-		for (unsigned int i=0; i<gui::gui_buttons_maxid; ++i){
-			//if (gui::gui_buttons.find(i) !=  gui::gui_buttons.end()){
-			if (gui::gui_buttons[i].visible == true && gui::gui_buttons[i].parent_id == -1){
-      	gui::gui_buttons[i].update();
-				gui::gui_buttons[i].draw();
+		for (auto &b : gui::gui_buttons){
+			if (b.second.visible == true && b.second.parent_id == -1){
+      	b.second.update();
+				b.second.draw();
 			}
 		}
 		enigma_user::draw_set_halign(phalign);

@@ -15,21 +15,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef BGUI_SKINS_H
-#define BGUI_SKINS_H
+#ifndef BGUI_GROUPS_H
+#define BGUI_GROUPS_H
 
 namespace gui
 {
-	class gui_skin{
+	class gui_group{
 		public:
 			unsigned int id;
-			int button_style;
-			int window_style;
-			int toggle_style;
-			int slider_style;
-			int label_style;
 
-			gui_skin();
+      vector<unsigned int> group_buttons;
+      vector<unsigned int> group_toggles;
 	};
 }
 
