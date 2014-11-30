@@ -31,6 +31,7 @@ namespace enigma
       double image_angle=inst->image_angle;
       vspeedv vspeed=inst->vspeed;
       hspeedv hspeed=inst->hspeed;
+      var oldAlarm = enigma::extension_cast::as_extension_alarm(inst)->alarm;
 
       //For reference, these properties should remain as default:
       //  visible,
@@ -62,6 +63,13 @@ namespace enigma
       newinst->image_index=image_index; newinst->image_speed=image_speed;
       newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
       newinst->hspeed=hspeed; newinst->vspeed=vspeed;
+
+      //Copy over alarms expirations.
+      var& newAlarm = enigma::extension_cast::as_extension_alarm(newinst)->alarm;
+      for (int i=0; i<12; i++) {
+        newAlarm[i] = oldAlarm[i];
+      }
+
       if (perf) newinst->myevent_create();
   }
   
