@@ -36,7 +36,7 @@ static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
 namespace enigma_user
 {
 
-void registry_write_string(std::string name, std::string str)
+/*void registry_write_string(std::string name, std::string str)
 {
 	std::stringstream ss;
 	ss << "Software\\EnigmaGM\\" << game_id;
@@ -78,7 +78,7 @@ bool registry_exists(std::string name)
 	ss << "Software\\EnigmaGM\\" << game_id;
 
 	return registry_exists_ext(ss.str(), name);
-}
+}*/
 
 void registry_write_string_ext(std::string key, std::string name, std::string str)
 {

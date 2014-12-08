@@ -42,7 +42,7 @@ static std::string iniFilename = "";
 namespace enigma_user
 {
 
-void ini_open(std::string fname)
+/*void ini_open(std::string fname)
 {
 	iniFilename = fname;
 }
@@ -103,7 +103,7 @@ void ini_key_delete(std::string section, std::string key)
 void ini_section_delete(std::string section)
 {
   WritePrivateProfileString(section.c_str(), NULL, NULL, iniFilename.c_str());
-}
+}*/
 
 /* OS Specific; should be moved */
 
