@@ -19,6 +19,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
@@ -58,6 +59,7 @@ namespace enigma_user
 
 	void ini_open(std::string filename)
 	{
+std::cerr <<"Reading: " <<filename <<"\n";
 		//GM will silently fail to save anything if an invalidly-named file is selected. Since we flush the ini file on close, 
 		// we should try to filter out bad inis as early as possible (the final test will be in ini_close()).
 		if (filename.find_first_of(InvalidFilenameChars)!=std::string::npos) {
@@ -77,6 +79,7 @@ namespace enigma_user
 		//NOTE: Loading the file in its entirety is consistent with how GM handles inis.
 		std::ifstream infile(filename.c_str());
 		if (infile.good()) { //If the file isn't good, it might be because we are creating a new ini file, so it's not an error.
+std::cerr <<"File is good; attempting to load.\n";
 			currIni.load(infile, commentChar);
 		}
 	}
@@ -192,11 +195,14 @@ namespace enigma_user
 
 	string ini_read_string(string section, string key, string def)
 	{
+std::cerr <<"READ STRING\n";
 		//GM will err out when trying to read/write an unopened ini file.
 		if (currIniFile.empty()) {
 			show_error("IniFileSystem - cannot read string, as there is no ini file currently open.", true);
+std::cerr <<">Default\n";
 			return def;
 		} else {
+std::cerr <<">Value\n";
 			return currIni.read(section, key, def);
 		}
 	}

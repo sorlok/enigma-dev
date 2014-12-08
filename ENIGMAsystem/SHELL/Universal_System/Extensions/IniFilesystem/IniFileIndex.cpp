@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <sstream>
 #include <fstream>
+#include <iostream>
 
 namespace {
 
@@ -70,14 +71,17 @@ void enigma::IniFileIndex::load(std::istream& input, char commentChar)
 	std::string line;
 	std::string origLine;
 	while(std::getline(input, origLine)) {
+std::cerr <<"  Line: " <<line <<"\n";
 		//Trim front and back whitespace, but save the original line.
 		line = trim(origLine);
 
 		//Now, dispatch based on the current line type. Invalid lines are pruned and ignored.
 		if (line.empty() || line[0]==commentChar) {
+std::cerr <<"   Comment\n";
 			//It's a comment; append it to the current comment string.
 			comment <<origLine <<"\n";
 		} else if (line[0]=='[') {
+std::cerr <<"   Brace\n";
 			//Find the closing bracket.
 			size_t br = line.find(']', 1);
 			if (br != std::string::npos) {
@@ -96,15 +100,18 @@ void enigma::IniFileIndex::load(std::istream& input, char commentChar)
 			//Either way, clear the comment string (so the user doesn't think a section was read when it actually wasn't).
 			comment.str("");
 		} else {
+std::cerr <<"   KeyVal\n";
 			//Comments and empty lines were already taken care of, so all lines should be of the form {K = "V" ;C} with optional comment and quotes.
 			size_t eq = line.find('=');
 			if (eq != std::string::npos) {
+std::cerr <<"     found =\n";
 				std::string key = trim(line.substr(0,eq));
 				std::string value;
 
 				//The value is complicated by the fact that there might be a quoted string (with escaped quotes). So we have to scan it.
 				std::string rhs = trim(line.substr(eq+1));
 				if (!rhs.empty() && rhs[0]=='"') {
+std::cerr <<"     found quoted\n";
 					//Quoted string.
 					size_t qt = rhs.find('"', 1);
 					if (qt==std::string::npos) {
@@ -114,6 +121,7 @@ void enigma::IniFileIndex::load(std::istream& input, char commentChar)
 						rhs = trim(rhs.substr(qt+1));
 					}
 				} else {
+std::cerr <<"     found unquoted\n";
 					//Non-quoted string.
 					size_t ct = rhs.find(commentChar, 1);
 					if (ct==std::string::npos) {
@@ -127,11 +135,13 @@ void enigma::IniFileIndex::load(std::istream& input, char commentChar)
 
 				//rhs must be consumed (or there's a comment)
 				if (rhs.empty() || rhs[0]==commentChar) {
+std::cerr <<"     FOUND: " <<secName <<":" <<key <<":" <<value <<"\n";
 					//No empty strings.
 					if (!value.empty()) {
 						//No duplicates
 						if (sections[secName].props.count(key)==0) {
 							//Save it.
+std::cerr <<"     FOUND!\n";
 							sections[secName].props[key].prefix = comment.str();
 							sections[secName].props[key].value = value;
 							sections[secName].propKeyOrder.push_back(key);
@@ -143,15 +153,18 @@ void enigma::IniFileIndex::load(std::istream& input, char commentChar)
 				comment.str("");
 
 				//Now deal with comments.
+std::cerr <<"      dealing with comments\n";
 				if (rhs[0]==commentChar) {
 					sections[secName].props[key].postfix = trim(rhs);
 				}
+std::cerr <<"      dealing with comments -- done\n";
 			}
 		}
 	}
 
 	//Save any leftover comments.
 	postComment = comment.str();
+std::cerr <<"ALL DONE\n";
 }
 
 
@@ -180,11 +193,14 @@ bool enigma::IniFileIndex::sectionExists(const std::string& section)
 
 std::string enigma::IniFileIndex::read(const std::string& section, const std::string& key, std::string def) const
 {
+std::cerr <<"  internal read string\n";
 	std::map<std::string, IniFileSection>::const_iterator secIt = sections.find(section);
-	if (secIt==sections.end()) { return def; }
+	if (secIt==sections.end()) { std::cerr <<"    def1\n"; return def; }
 	std::map<std::string, IniValue>::const_iterator propIt = secIt->second.props.find(key);
-	if (propIt==secIt->second.props.end()) { return def; }
-	return propIt->second.value;
+	if (propIt==secIt->second.props.end()) {  std::cerr <<"    def2\n"; return def; }
+std::cerr <<"  >found\n";
+std::cerr <<"  >found: " <<propIt->second.value <<"\n";
+	return std::string(propIt->second.value);
 }
 
 float enigma::IniFileIndex::read(const std::string& section, const std::string& key, float def) const
