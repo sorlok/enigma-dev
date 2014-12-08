@@ -17,8 +17,9 @@
 
 #ifndef BGUI_STYLES_H
 #define BGUI_STYLES_H
-#include <array>
-using std::array;
+//#include <array>
+#include <vector>
+//using std::array;
 
 #include "common.h"
 
@@ -28,9 +29,9 @@ namespace gui
 		public:
 			unsigned int id;
 
-			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
+			std::vector<font_style> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
 
-      array<int,6> sprites;
+      std::vector<int> sprites;
 
 			rect box;
 			rect_offset border;

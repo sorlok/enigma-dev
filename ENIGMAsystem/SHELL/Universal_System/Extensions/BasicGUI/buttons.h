@@ -17,8 +17,9 @@
 
 #ifndef BGUI_BUTTONS_H
 #define BGUI_BUTTONS_H
-#include <array>
-using std::array;
+#include <vector>
+//#include <array>
+//using std::array;
 
 #include "common.h"
 

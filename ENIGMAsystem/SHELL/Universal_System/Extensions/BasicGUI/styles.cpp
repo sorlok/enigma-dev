@@ -14,11 +14,12 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-#include <unordered_map>
+/*
+//#include <unordered_map>
+#include <map>
 #include <string>
 using std::string;
-using std::unordered_map;
+//using std::unordered_map;
 using std::pair;
 
 #include "Universal_System/var4.h"
@@ -36,7 +37,7 @@ namespace gui{
     sprites.fill(-1);
 	}
 
-	unordered_map<unsigned int, gui_style> gui_styles;
+	std::map<unsigned int, gui_style> gui_styles;
 	unsigned int gui_styles_maxid = 0;
 
 	//Default styles
@@ -128,4 +129,4 @@ namespace enigma_user
   void gui_style_set_image_offset(int id, gs_scalar x, gs_scalar y){
 		gui::gui_styles[id].image_offset.set(x,y);
 	}
-}
+}*/

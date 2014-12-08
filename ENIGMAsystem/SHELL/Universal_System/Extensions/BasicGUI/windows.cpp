@@ -14,11 +14,12 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-#include <unordered_map>
+/*
+//#include <unordered_map>
+#include <map>
 #include <string>
 using std::string;
-using std::unordered_map;
+//using std::unordered_map;
 using std::pair;
 
 #include "Universal_System/var4.h"
@@ -44,18 +45,18 @@ using std::pair;
 namespace gui
 {
   bool windowStopPropagation = false; //Stop event propagation in windows and between
-	unordered_map<unsigned int, gui_window> gui_windows;
+	std::map<unsigned int, gui_window> gui_windows;
 	unsigned int gui_windows_maxid = 0;
 	extern unsigned int gui_style_window;
 
-  extern unordered_map<unsigned int, gui_style> gui_styles;
+  extern std::map<unsigned int, gui_style> gui_styles;
 
 	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-	extern unordered_map<unsigned int, gui_button> gui_buttons;
-	extern unordered_map<unsigned int, gui_toggle> gui_toggles;
-  extern unordered_map<unsigned int, gui_slider> gui_sliders;
-  extern unordered_map<unsigned int, gui_label> gui_labels;
+	extern std::map<unsigned int, gui_skin> gui_skins;
+	extern std::map<unsigned int, gui_button> gui_buttons;
+	extern std::map<unsigned int, gui_toggle> gui_toggles;
+  extern std::map<unsigned int, gui_slider> gui_sliders;
+  extern std::map<unsigned int, gui_label> gui_labels;
 	extern unsigned int gui_skins_maxid;
 
 	//Implements button class
@@ -300,4 +301,4 @@ namespace enigma_user
     gui::gui_windows[id].child_labels.push_back(sid);
     gui::gui_labels[sid].parent_id = id;
   }
-}
+}*/

@@ -17,10 +17,10 @@
 
 #ifndef BGUI_WINDOWS_H
 #define BGUI_WINDOWS_H
-#include <array>
+//#include <array>
 #include <vector>
 
-using std::array;
+//using std::array;
 using std::vector;
 
 #include "common.h"

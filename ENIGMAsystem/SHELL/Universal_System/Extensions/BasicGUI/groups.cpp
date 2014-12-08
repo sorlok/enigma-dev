@@ -14,11 +14,12 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-#include <unordered_map>
+/*
+//#include <unordered_map>
 #include <string>
+#include <map>
 using std::string;
-using std::unordered_map;
+//using std::unordered_map;
 using std::pair;
 
 #include "Universal_System/var4.h"
@@ -37,11 +38,11 @@ using std::pair;
 
 namespace gui{
 
-	unordered_map<unsigned int, gui_group> gui_groups;
+	std::map<unsigned int, gui_group> gui_groups;
 	unsigned int gui_groups_maxid = 0;
 
-  extern unordered_map<unsigned int, gui_button> gui_buttons;
-	extern unordered_map<unsigned int, gui_toggle> gui_toggles;
+  extern std::map<unsigned int, gui_button> gui_buttons;
+	extern std::map<unsigned int, gui_toggle> gui_toggles;
 }
 
 namespace enigma_user
@@ -65,4 +66,4 @@ namespace enigma_user
     gui::gui_groups[id].group_toggles.push_back(tid);
     gui::gui_toggles[tid].group_id = id;
   }
-}
+}*/

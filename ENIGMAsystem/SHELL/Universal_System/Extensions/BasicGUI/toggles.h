@@ -17,8 +17,8 @@
 
 #ifndef BGUI_TOGGLE_H
 #define BGUI_TOGGLE_H
-#include <array>
-using std::array;
+//#include <array>
+//using std::array;
 
 #include "common.h"
 

@@ -14,11 +14,12 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-#include <unordered_map>
+/*
+//#include <unordered_map>
+#include <map>
 #include <string>
 using std::string;
-using std::unordered_map;
+//using std::unordered_map;
 using std::pair;
 
 #include "Universal_System/var4.h"
@@ -37,12 +38,12 @@ using std::pair;
 
 namespace gui
 {
-  unordered_map<unsigned int, gui_label> gui_labels;
+  std::map<unsigned int, gui_label> gui_labels;
 	unsigned int gui_labels_maxid = 0;
 
 	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-	extern unordered_map<unsigned int, gui_style> gui_styles;
+	extern std::map<unsigned int, gui_skin> gui_skins;
+	extern std::map<unsigned int, gui_style> gui_styles;
 	extern unsigned int gui_skins_maxid;
 	extern unsigned int gui_style_label;
 
@@ -165,4 +166,4 @@ namespace enigma_user
 		enigma_user::draw_set_alpha(palpha);
 	}
 }
-
+*/

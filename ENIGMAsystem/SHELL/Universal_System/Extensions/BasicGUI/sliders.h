@@ -17,8 +17,8 @@
 
 #ifndef BGUI_SLIDER_H
 #define BGUI_SLIDER_H
-#include <array>
-using std::array;
+//#include <array>
+//using std::array;
 
 #include "common.h"
 

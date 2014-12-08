@@ -14,11 +14,12 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-#include <unordered_map>
+/*
+//#include <unordered_map>
+#include <map>
 #include <string>
 using std::string;
-using std::unordered_map;
+//using std::unordered_map;
 using std::pair;
 
 #include "Universal_System/var4.h"
@@ -51,7 +52,7 @@ namespace gui{
 	}
 
 	int gui_bound_skin = -1;
-	unordered_map<unsigned int, gui_skin> gui_skins;
+	std::map<unsigned int, gui_skin> gui_skins;
 	unsigned int gui_skins_maxid = 0;
 }
 
@@ -90,4 +91,4 @@ namespace enigma_user
   int gui_skin_get_label(int id){
     return (gui::gui_skins[id].label_style);
 	}
-}
+}*/

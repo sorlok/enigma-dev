@@ -21,8 +21,8 @@
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
 
-#include <unordered_map>
-using std::unordered_map;
+//#include <unordered_map>
+//using std::unordered_map;
 using std::pair;
 
 namespace enigma_user

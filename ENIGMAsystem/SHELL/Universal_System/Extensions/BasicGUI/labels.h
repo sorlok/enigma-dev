@@ -17,8 +17,8 @@
 
 #ifndef BGUI_LABELS_H
 #define BGUI_LABELS_H
-#include <array>
-using std::array;
+//#include <array>
+//using std::array;
 
 #include "common.h"
 
