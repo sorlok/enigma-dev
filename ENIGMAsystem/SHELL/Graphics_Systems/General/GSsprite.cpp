@@ -18,6 +18,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <string>
+#include <iostream>
 using std::string;
 
 #include "../General/GScolors.h"
@@ -87,6 +88,10 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+if (usi>=spr2d->texbordxarray.size()) {
+std::cerr <<"ERROR: SRPITE\n";
+return;
+}
 
 	rot *= M_PI/180;
 

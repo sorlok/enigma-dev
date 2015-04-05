@@ -19,6 +19,7 @@
 #include <map>
 #include <math.h>
 #include <string>
+#include <iostream>
 
 #include "var4.h"
 #include "reflexive_types.h"
@@ -161,6 +162,7 @@ namespace enigma
         dit->second.tiles.clear();
       }
     }
+//std::cerr <<"LOADING: " <<tilecount <<" TILES\n";
     for (int i = 0; i < tilecount; i++) {
       tile t = tiles[i];
       drawing_depths[t.depth].tiles.push_back(t);

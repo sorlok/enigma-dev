@@ -16,6 +16,7 @@
 **/
 
 // Tile system
+#include <iostream>
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
@@ -70,10 +71,13 @@ namespace enigma
 
     void load_tiles()
     {
+//return; //TODO: Are tiles broken?
         glPushAttrib(GL_CURRENT_BIT);
+size_t count = 0;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
             if (dit->second.tiles.size())
             {
+//std::cerr <<"On tile depth: " <<count++ <<"\n";
                 enigma_user::texture_reset();
                 sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
                 int index = int(glGenLists(1));

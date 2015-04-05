@@ -184,7 +184,7 @@ string string_copy(string str, int index, int count) {
 }
 
 string string_set_byte_at(string str, int index, char byte) {
-	if (index<=1) return str + byte;
+	if (index<1) return str + byte;
 	const size_t x = index-1;
 	return x>str.length()? str + byte: str.replace(x, 1, 1, byte);
 }
