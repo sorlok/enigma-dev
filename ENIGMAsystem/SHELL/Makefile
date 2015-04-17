@@ -61,12 +61,12 @@ ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
-	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
-	override CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
-	override LDFLAGS += -flto -s -O3
+	override CXXFLAGS += -Wall -s -O1 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
+	override CFLAGS += -Wall -s -O1 -flto -fno-exceptions -fdata-sections -ffunction-sections
+	override LDFLAGS += -flto -s -O1
 else
-	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
-	override CFLAGS += -Wall -s -O3 -fno-exceptions
+	override CXXFLAGS += -Wall -s -O1 -fno-rtti -fno-exceptions
+	override CFLAGS += -Wall -s -O1 -fno-exceptions
 endif
 
 ifeq ($(PLATFORM), Win32)
