@@ -187,6 +187,8 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
 
+  //Prepare a copy of all resource names, for the new parser.
+  std::ofstream sidelist(makedir+"resource_list.txt");
 
   //First, we make a space to put our globals.
   jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
@@ -195,56 +197,87 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   //Next, add the resource names to that list
   edbg << "Copying resources:" << flushl;
-
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
+  sidelist <<"sprites:" <<es->spriteCount <<"\n";
   for (int i = 0; i < es->spriteCount; i++) {
     cout << "Name on this side: " << globals_scope.name << endl;
     cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
     cout << "Pointer on this side: " << (&globals_scope) << endl;
     cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
     
+    sidelist <<es->sprites[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
   }
 
   edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
-  for (int i = 0; i < es->soundCount; i++)
+  sidelist <<"sounds:" <<es->soundCount <<"\n";
+  for (int i = 0; i < es->soundCount; i++) {
+    sidelist <<es->sounds[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sounds[i].name);
+  }
 
   edbg << "Copying background names [" << es->backgroundCount << "]" << flushl;
-  for (int i = 0; i < es->backgroundCount; i++)
+  sidelist <<"backgrounds:" <<es->backgroundCount <<"\n";
+  for (int i = 0; i < es->backgroundCount; i++) {
+    sidelist <<es->backgrounds[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->backgrounds[i].name);
+  }
 
   edbg << "Copying path names [" << es->pathCount << "]" << flushl;
-  for (int i = 0; i < es->pathCount; i++)
+  sidelist <<"paths:" <<es->pathCount <<"\n";
+  for (int i = 0; i < es->pathCount; i++) {
+    sidelist <<es->paths[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->paths[i].name);
+  }
 
   edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
-  for (int i = 0; i < es->scriptCount; i++)
+  sidelist <<"scripts:" <<es->scriptCount <<"\n";
+  for (int i = 0; i < es->scriptCount; i++) {
+    sidelist <<es->scripts[i].name <<"\n";
     quickmember_script(&globals_scope,es->scripts[i].name);
+  }
 
   edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
-  for (int i = 0; i < es->shaderCount; i++)
+  sidelist <<"shaders:" <<es->shaderCount <<"\n";
+  for (int i = 0; i < es->shaderCount; i++) {
+    sidelist <<es->shaders[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
+  }
 
   edbg << "Copying font names [" << es->fontCount << "]" << flushl;
-  for (int i = 0; i < es->fontCount; i++)
+  sidelist <<"fonts:" <<es->fontCount <<"\n";
+  for (int i = 0; i < es->fontCount; i++) {
+    sidelist <<es->fonts[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->fonts[i].name);
+  }
 
   edbg << "Copying timeline names [" << es->timelineCount << "]" << flushl;
-  for (int i = 0; i < es->timelineCount; i++)
+  sidelist <<"timelines:" <<es->timelineCount <<"\n";
+  for (int i = 0; i < es->timelineCount; i++) {
+    sidelist <<es->timelines[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->timelines[i].name);
+  }
 
   edbg << "Copying object names [" << es->gmObjectCount << "]" << flushl;
-  for (int i = 0; i < es->gmObjectCount; i++)
+  sidelist <<"objects:" <<es->gmObjectCount <<"\n";
+  for (int i = 0; i < es->gmObjectCount; i++) {
+    sidelist <<es->gmObjects[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->gmObjects[i].name);
+  }
 
   edbg << "Copying room names [" << es->roomCount << "]" << flushl;
-  for (int i = 0; i < es->roomCount; i++)
+  sidelist <<"rooms:" <<es->roomCount <<"\n";
+  for (int i = 0; i < es->roomCount; i++) {
+    sidelist <<es->rooms[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
+  }
 
   edbg << "Copying constant names [" << es->constantCount << "]" << flushl;
-  for (int i = 0; i < es->constantCount; i++)
+  sidelist <<"constants:" <<es->constantCount <<"\n";
+  for (int i = 0; i < es->constantCount; i++) {
+    sidelist <<es->constants[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->constants[i].name);
+  }
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
