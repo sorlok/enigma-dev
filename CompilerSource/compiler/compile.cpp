@@ -116,170 +116,33 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
   return current_language->compile(es, exe_filename, mode);
 }
 
-int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
+//Error macro, relies on "res".
+#define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
+
+
+int parse_new(EnigmaStruct *es) 
 {
-  
-  cout << "Initializing dialog boxes" << endl;
-    ide_dia_clear();
-    ide_dia_open();
-  cout << "Initialized." << endl;
+  //Our command is pretty simple.
+  std::string parseCmd = std::string("java -cp \"/home/sethhetu/source/antlr_enigma/bin:/home/sethhetu/bin/antlr-4.5-complete.jar\" hetu.seth.Runner  " + makedir);
 
-  if (mode == emode_rebuild)
-  {
-    edbg << "Cleaning..." << flushl;
+  edbg << "Running NEW parser as \"" <<parseCmd << "\"" << flushl;
 
-	string make = "clean-game ";
-	string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
-	make += "COMPILEPATH=\"" + compilepath + "\" ";
-	make += "WORKDIR=\"" + makedir + "\" ";
-	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
+  // Pick a file and flush it
+  const string redirfile = (makedir + "new_parser.log");
+  fclose(fopen(redirfile.c_str(),"wb"));
 
-	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
-    e_execs(MAKE_location,make);
+  // Redirect it
+  ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
+  int parseres = e_execs(parseCmd,"&> \"" + redirfile + "\"");
 
-    edbg << "Done.\n" << flushl;
-	idpr("Done.", 100);
-	return 0;
-  }
-  edbg << "Building for mode (" << mode << ")" << flushl;
- 
-  // CLean up from any previous executions.
+  // Stop redirecting output
+  ide_output_redirect_reset();
 
-  edbg << "Cleaning up from previous executions" << flushl;
-    parsed_objects.clear(); //Make sure we don't dump in any old object code...
-    edbg << " - Cleared parsed objects" << flushl;
-    parsed_rooms.clear();   //Or that we dump any room code, for that matter...
-    edbg << " - Cleared room entries" << flushl;
-    shared_locals_clear();  //Forget inherited locals, we'll reparse them
-    edbg << " - Cleared shared locals list" << flushl;
-    event_info_clear();     //Forget event definitions, we'll re-get them
-    edbg << " - Cleared event info" << flushl;
+  return parseres;
+}
 
-  // Re-establish ourself
-    // Read the global locals: locals that will be included with each instance
-    {
-      vector<string> extnp;
-      for (int i = 0; i < es->extensionCount; i++) {
-        cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
-        extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
-      }
-      edbg << "Loading shared locals from extensions list" << flushl;
-      if (shared_locals_load(extnp) != 0) {
-        user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
-        idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
-      }
-    }
-
-  //Read the types of events
-  event_parse_resourcefile();
-
-  // Pick apart the sent resources
-  edbg << "Location in memory of structure: " << (void*)es << flushl;
-  if (es == NULL) {
-    idpr("Java ENIGMA plugin dropped its ass.",-1);
-    return E_ERROR_PLUGIN_FUCKED_UP;
-  }
-
-
-  /**** Segment One: This segment of the compile process is responsible for
-  * @ * translating the code into C++. Basically, anything essential to the
-  *//// compilation of said code is dealt with during this segment.
-
-  ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
-
-  //Prepare a copy of all resource names, for the new parser.
-  std::ofstream sidelist(makedir+"resource_list.txt");
-
-  //First, we make a space to put our globals.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
-
-  idpr("Copying resources",1);
-
-  //Next, add the resource names to that list
-  edbg << "Copying resources:" << flushl;
-  edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
-  sidelist <<"sprites:" <<es->spriteCount <<"\n";
-  for (int i = 0; i < es->spriteCount; i++) {
-    cout << "Name on this side: " << globals_scope.name << endl;
-    cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
-    cout << "Pointer on this side: " << (&globals_scope) << endl;
-    cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
-    
-    sidelist <<es->sprites[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
-  }
-
-  edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
-  sidelist <<"sounds:" <<es->soundCount <<"\n";
-  for (int i = 0; i < es->soundCount; i++) {
-    sidelist <<es->sounds[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sounds[i].name);
-  }
-
-  edbg << "Copying background names [" << es->backgroundCount << "]" << flushl;
-  sidelist <<"backgrounds:" <<es->backgroundCount <<"\n";
-  for (int i = 0; i < es->backgroundCount; i++) {
-    sidelist <<es->backgrounds[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->backgrounds[i].name);
-  }
-
-  edbg << "Copying path names [" << es->pathCount << "]" << flushl;
-  sidelist <<"paths:" <<es->pathCount <<"\n";
-  for (int i = 0; i < es->pathCount; i++) {
-    sidelist <<es->paths[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->paths[i].name);
-  }
-
-  edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
-  sidelist <<"scripts:" <<es->scriptCount <<"\n";
-  for (int i = 0; i < es->scriptCount; i++) {
-    sidelist <<es->scripts[i].name <<"\n";
-    quickmember_script(&globals_scope,es->scripts[i].name);
-  }
-
-  edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
-  sidelist <<"shaders:" <<es->shaderCount <<"\n";
-  for (int i = 0; i < es->shaderCount; i++) {
-    sidelist <<es->shaders[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
-  }
-
-  edbg << "Copying font names [" << es->fontCount << "]" << flushl;
-  sidelist <<"fonts:" <<es->fontCount <<"\n";
-  for (int i = 0; i < es->fontCount; i++) {
-    sidelist <<es->fonts[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->fonts[i].name);
-  }
-
-  edbg << "Copying timeline names [" << es->timelineCount << "]" << flushl;
-  sidelist <<"timelines:" <<es->timelineCount <<"\n";
-  for (int i = 0; i < es->timelineCount; i++) {
-    sidelist <<es->timelines[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->timelines[i].name);
-  }
-
-  edbg << "Copying object names [" << es->gmObjectCount << "]" << flushl;
-  sidelist <<"objects:" <<es->gmObjectCount <<"\n";
-  for (int i = 0; i < es->gmObjectCount; i++) {
-    sidelist <<es->gmObjects[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->gmObjects[i].name);
-  }
-
-  edbg << "Copying room names [" << es->roomCount << "]" << flushl;
-  sidelist <<"rooms:" <<es->roomCount <<"\n";
-  for (int i = 0; i < es->roomCount; i++) {
-    sidelist <<es->rooms[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
-  }
-
-  edbg << "Copying constant names [" << es->constantCount << "]" << flushl;
-  sidelist <<"constants:" <<es->constantCount <<"\n";
-  for (int i = 0; i < es->constantCount; i++) {
-    sidelist <<es->constants[i].name <<"\n";
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->constants[i].name);
-  }
-
-
+int parse_old(EnigmaStruct *es, int mode) //Mode used for "debug", etc. information
+{
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
 
   idpr("Checking Syntax and performing Preliminary Parsing",2);
@@ -296,7 +159,6 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   used_funcs::zero();
 
   int res;
-  #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
   //The parser (and, to some extent, the compiler) needs knowledge of script names for various optimizations.
   std::set<std::string> script_names;
@@ -311,60 +173,6 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   ofstream wto;
   idpr("Outputting Resources in Various Places...",10);
-
-  // FIRST FILE
-  // Modes, settings and executable information.
-  
-  GameSettings gameSet = es->gameSettings;
-  edbg << "Writing executable information and resources." << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
-    wto << license;
-    wto << "#include <windows.h>\n";
-	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
-		wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
-	}
-	wto << "VS_VERSION_INFO VERSIONINFO\n";
-	wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
-	wto << "PRODUCTVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
-	wto << "BEGIN\n" << "BLOCK \"StringFileInfo\"\n" << "BEGIN\n" << "BLOCK \"040904E4\"\n" << "BEGIN\n";
-	wto << "VALUE \"CompanyName\",         \"" << gameSet.company << "\"\n";
-	wto << "VALUE \"FileDescription\",     \"" << gameSet.description << "\"\n";
-	wto << "VALUE \"FileVersion\",         \"" << gameSet.version << "\\0\"\n";
-	wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
-	wto << "VALUE \"ProductVersion\",      \"" << gameSet.version << "\\0\"\n";
-	wto << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright << "\"\n";
-	if (es->filename != NULL && strlen(es->filename) > 0) {
-		wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
-	} else {
-		wto << "VALUE \"OriginalFilename\",         \"\"\n";
-	}
-	wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
-	wto << "VALUE \"Translation\", 0x409, 1252\n";
-	wto << "END\nEND";
-  wto.close();
-  
-  edbg << "Writing modes and settings" << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
-    wto << license;
-    wto << "#define ASSUMEZERO 0\n";
-    wto << "#define PRIMBUFFER 0\n";
-    wto << "#define PRIMDEPTH2 6\n";
-    wto << "#define AUTOLOCALS 0\n";
-    wto << "#define MODE3DVARS 0\n";
-    wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
-    wto << '\n';
-  wto.close();
-
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
-    wto << license;
-    wto << "#define BUILDMODE " << 0 << "\n";
-    wto << "#define DEBUGMODE " << 0 << "\n";
-    wto << '\n';
-  wto.close();
-
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
-  wto.close();
-
 
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
@@ -388,7 +196,6 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Writing resource names and maxima" << flushl;
   wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
     wto << license;
-
 
 stringstream ss;
 
@@ -563,18 +370,9 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   res = current_language->compile_writeObjAccess(parsed_objects, &EGMglobal, es->gameSettings.treatUninitializedAs0);
   irrr();
 
-  edbg << "Writing font data" << flushl;
-  res = current_language->compile_writeFontInfo(es);
-  irrr();
-
   edbg << "Writing room data" << flushl;
   res = current_language->compile_writeRoomData(es,&EGMglobal,mode);
   irrr();
-
-  edbg << "Writing shader data" << flushl;
-  res = current_language->compile_writeShaderData(es,&EGMglobal);
-  irrr();
-
 
   // Write the global variables to their own file to be included before any of the objects
   res = current_language->compile_writeGlobals(es,&EGMglobal);
@@ -599,6 +397,250 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     outputFile.close();
 #endif
 
+  return 0;
+}
+
+
+int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
+{ 
+  cout << "Initializing dialog boxes" << endl;
+    ide_dia_clear();
+    ide_dia_open();
+  cout << "Initialized." << endl;
+
+  if (mode == emode_rebuild)
+  {
+    edbg << "Cleaning..." << flushl;
+
+	string make = "clean-game ";
+	string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+	make += "COMPILEPATH=\"" + compilepath + "\" ";
+	make += "WORKDIR=\"" + makedir + "\" ";
+	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
+
+	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
+    e_execs(MAKE_location,make);
+
+    edbg << "Done.\n" << flushl;
+	idpr("Done.", 100);
+	return 0;
+  }
+  edbg << "Building for mode (" << mode << ")" << flushl;
+ 
+  // CLean up from any previous executions.
+
+  edbg << "Cleaning up from previous executions" << flushl;
+    parsed_objects.clear(); //Make sure we don't dump in any old object code...
+    edbg << " - Cleared parsed objects" << flushl;
+    parsed_rooms.clear();   //Or that we dump any room code, for that matter...
+    edbg << " - Cleared room entries" << flushl;
+    shared_locals_clear();  //Forget inherited locals, we'll reparse them
+    edbg << " - Cleared shared locals list" << flushl;
+    event_info_clear();     //Forget event definitions, we'll re-get them
+    edbg << " - Cleared event info" << flushl;
+
+  // Re-establish ourself
+    // Read the global locals: locals that will be included with each instance
+    {
+      vector<string> extnp;
+      for (int i = 0; i < es->extensionCount; i++) {
+        cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
+        extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
+      }
+      edbg << "Loading shared locals from extensions list" << flushl;
+      if (shared_locals_load(extnp) != 0) {
+        user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
+        idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+      }
+    }
+
+  //Read the types of events
+  event_parse_resourcefile();
+
+  // Pick apart the sent resources
+  edbg << "Location in memory of structure: " << (void*)es << flushl;
+  if (es == NULL) {
+    idpr("Java ENIGMA plugin dropped its ass.",-1);
+    return E_ERROR_PLUGIN_FUCKED_UP;
+  }
+
+
+  /**** Segment One: This segment of the compile process is responsible for
+  * @ * translating the code into C++. Basically, anything essential to the
+  *//// compilation of said code is dealt with during this segment.
+
+  ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
+
+  //Prepare a copy of all resource names, for the new parser.
+  std::ofstream sidelist(makedir+"resource_list.txt");
+
+  //First, we make a space to put our globals.
+  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+
+  idpr("Copying resources",1);
+
+  //Next, add the resource names to that list
+  edbg << "Copying resources:" << flushl;
+  edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
+  sidelist <<"sprites:" <<es->spriteCount <<"\n";
+  for (int i = 0; i < es->spriteCount; i++) {
+    cout << "Name on this side: " << globals_scope.name << endl;
+    cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
+    cout << "Pointer on this side: " << (&globals_scope) << endl;
+    cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
+    
+    sidelist <<es->sprites[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
+  }
+
+  edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
+  sidelist <<"sounds:" <<es->soundCount <<"\n";
+  for (int i = 0; i < es->soundCount; i++) {
+    sidelist <<es->sounds[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sounds[i].name);
+  }
+
+  edbg << "Copying background names [" << es->backgroundCount << "]" << flushl;
+  sidelist <<"backgrounds:" <<es->backgroundCount <<"\n";
+  for (int i = 0; i < es->backgroundCount; i++) {
+    sidelist <<es->backgrounds[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->backgrounds[i].name);
+  }
+
+  edbg << "Copying path names [" << es->pathCount << "]" << flushl;
+  sidelist <<"paths:" <<es->pathCount <<"\n";
+  for (int i = 0; i < es->pathCount; i++) {
+    sidelist <<es->paths[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->paths[i].name);
+  }
+
+  edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
+  sidelist <<"scripts:" <<es->scriptCount <<"\n";
+  for (int i = 0; i < es->scriptCount; i++) {
+    sidelist <<es->scripts[i].name <<"\n";
+    quickmember_script(&globals_scope,es->scripts[i].name);
+  }
+
+  edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
+  sidelist <<"shaders:" <<es->shaderCount <<"\n";
+  for (int i = 0; i < es->shaderCount; i++) {
+    sidelist <<es->shaders[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
+  }
+
+  edbg << "Copying font names [" << es->fontCount << "]" << flushl;
+  sidelist <<"fonts:" <<es->fontCount <<"\n";
+  for (int i = 0; i < es->fontCount; i++) {
+    sidelist <<es->fonts[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->fonts[i].name);
+  }
+
+  edbg << "Copying timeline names [" << es->timelineCount << "]" << flushl;
+  sidelist <<"timelines:" <<es->timelineCount <<"\n";
+  for (int i = 0; i < es->timelineCount; i++) {
+    sidelist <<es->timelines[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->timelines[i].name);
+  }
+
+  edbg << "Copying object names [" << es->gmObjectCount << "]" << flushl;
+  sidelist <<"objects:" <<es->gmObjectCount <<"\n";
+  for (int i = 0; i < es->gmObjectCount; i++) {
+    sidelist <<es->gmObjects[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->gmObjects[i].name);
+  }
+
+  edbg << "Copying room names [" << es->roomCount << "]" << flushl;
+  sidelist <<"rooms:" <<es->roomCount <<"\n";
+  for (int i = 0; i < es->roomCount; i++) {
+    sidelist <<es->rooms[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
+  }
+
+  edbg << "Copying constant names [" << es->constantCount << "]" << flushl;
+  sidelist <<"constants:" <<es->constantCount <<"\n";
+  for (int i = 0; i < es->constantCount; i++) {
+    sidelist <<es->constants[i].name <<"\n";
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->constants[i].name);
+  }
+
+  //Done with the resource list.
+  sidelist.close();
+
+  // Some files don't need the new parser.
+  GameSettings gameSet = es->gameSettings;
+  edbg << "Writing executable information and resources." << flushl;
+  ofstream wto;
+  wto.open((makedir +"Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
+    wto << license;
+    wto << "#include <windows.h>\n";
+	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
+		wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
+	}
+	wto << "VS_VERSION_INFO VERSIONINFO\n";
+	wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
+	wto << "PRODUCTVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
+	wto << "BEGIN\n" << "BLOCK \"StringFileInfo\"\n" << "BEGIN\n" << "BLOCK \"040904E4\"\n" << "BEGIN\n";
+	wto << "VALUE \"CompanyName\",         \"" << gameSet.company << "\"\n";
+	wto << "VALUE \"FileDescription\",     \"" << gameSet.description << "\"\n";
+	wto << "VALUE \"FileVersion\",         \"" << gameSet.version << "\\0\"\n";
+	wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
+	wto << "VALUE \"ProductVersion\",      \"" << gameSet.version << "\\0\"\n";
+	wto << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright << "\"\n";
+	if (es->filename != NULL && strlen(es->filename) > 0) {
+		wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
+	} else {
+		wto << "VALUE \"OriginalFilename\",         \"\"\n";
+	}
+	wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
+	wto << "VALUE \"Translation\", 0x409, 1252\n";
+	wto << "END\nEND";
+  wto.close();
+
+  edbg << "Writing modes and settings" << flushl;
+  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+    wto << license;
+    wto << "#define ASSUMEZERO 0\n";
+    wto << "#define PRIMBUFFER 0\n";
+    wto << "#define PRIMDEPTH2 6\n";
+    wto << "#define AUTOLOCALS 0\n";
+    wto << "#define MODE3DVARS 0\n";
+    wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
+    wto << '\n';
+  wto.close();
+
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
+    wto << license;
+    wto << "#define BUILDMODE " << 0 << "\n";
+    wto << "#define DEBUGMODE " << 0 << "\n";
+    wto << '\n';
+  wto.close();
+
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
+  wto.close();
+
+  int res = 0;
+
+  edbg << "Writing font data" << flushl;
+  res = current_language->compile_writeFontInfo(es);
+  irrr();
+
+  edbg << "Writing shader data" << flushl;
+  res = current_language->compile_writeShaderData(es,NULL);
+  irrr();
+
+  // Next step depends on whether we are using the old or new-style parser
+  const bool NEW_PARSER = true;
+  int parse_res = 0;
+  if (NEW_PARSER) {
+    parse_res = parse_new(es);
+  } else {
+    parse_res = parse_old(es, mode);
+  }
+  if (parse_res) {
+    idpr("(New) parser failed to parse code.",-1);
+    return E_ERROR_BUILD;
+  }
+  user << "******** New Parser Completed Successfully ******** \n";
 
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
