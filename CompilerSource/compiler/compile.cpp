@@ -124,7 +124,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 int parse_new(EnigmaStruct *es) 
 {
   //Our command is pretty simple.
-  std::string parseCmd = std::string("java -cp \"/home/sethhetu/source/antlr_enigma/bin:/home/sethhetu/bin/antlr-4.5-complete.jar\" hetu.seth.Runner  " + makedir);
+  std::string parseCmd = std::string("java -cp \"/home/sethhetu/source/enigma-dev/AntlrCompiler/bin:/home/sethhetu/bin/antlr-4.5-complete.jar\" hetu.seth.Runner  " + makedir);
 
   edbg << "Running NEW parser as \"" <<parseCmd << "\"" << flushl;
 
