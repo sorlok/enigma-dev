@@ -44,6 +44,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 #include <fstream>
 //#include <dirent.h>
 #include <sys/stat.h>
@@ -128,7 +129,7 @@ int parse_new(EnigmaStruct *es)
   edbg << "Running NEW parser as \"" <<parseCmd << "\"" << flushl;
 
   // Pick a file and flush it
-  const string redirfile = (makedir + "new_parser.log");
+  const string redirfile = (makedir + "parser.log");
   fclose(fopen(redirfile.c_str(),"wb"));
 
   // Redirect it
@@ -472,7 +473,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   ///The segment begins by adding resource names to the collection of variables that should not be automatically re-scoped.
 
   //Prepare a copy of all resource names, for the new parser.
-  std::ofstream sidelist(makedir+"resource_list.txt");
+  std::ofstream sidelist(makedir+"parser_resources.txt");
 
   //First, we make a space to put our globals.
   jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
@@ -565,6 +566,40 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   //Done with the resource list.
   sidelist.close();
+
+  //The details of each game object matter.
+  std::ofstream objlist(makedir+"parser_objects.txt");
+  for (int i = 0; i < es->gmObjectCount; i++) {
+    //Save basic properties.
+    objlist <<"id:" <<es->gmObjects[i].id <<"\n";
+    objlist <<"name:" <<es->gmObjects[i].name <<"\n";
+    objlist <<"spriteId:" <<es->gmObjects[i].spriteId <<"\n";
+    objlist <<"maskId:" <<es->gmObjects[i].maskId <<"\n";
+    objlist <<"parentId:" <<es->gmObjects[i].parentId <<"\n";
+    objlist <<"visible:" <<es->gmObjects[i].visible <<"\n";
+    objlist <<"solid:" <<es->gmObjects[i].solid <<"\n";
+    objlist <<"depth:" <<es->gmObjects[i].depth <<"\n";
+    objlist <<"persistent:" <<es->gmObjects[i].persistent <<"\n";
+
+    //Save Event (Step) and Sub-Event (Begin Step) code.
+    for (int ii=0; ii<es->gmObjects[i].mainEventCount; ii++) {
+      if (es->gmObjects[i].mainEvents[ii].eventCount) {
+        for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++) {
+          //Make sure this event's code ends in a newline.
+          std::string code = es->gmObjects[i].mainEvents[ii].events[iii].code;
+          if (code[code.size()-1] != '\n') { code += "\n"; }
+
+          //Write events as event-mainEvId-subEvId:X, followed by X lines of code.
+          const int mainEvId = es->gmObjects[i].mainEvents[ii].id;
+          const int subEvId = es->gmObjects[i].mainEvents[ii].events[iii].id;
+          const size_t nlCount = std::count(code.begin(), code.end(), '\n');
+          objlist <<"event-" <<mainEvId <<"-" <<subEvId <<":" <<nlCount <<"\n" <<code;
+        }
+      }
+    }
+    objlist <<"object_done\n";
+  }
+  objlist.close();
 
   // Some files don't need the new parser.
   GameSettings gameSet = es->gameSettings;
