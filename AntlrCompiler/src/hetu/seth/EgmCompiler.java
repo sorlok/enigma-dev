@@ -76,6 +76,25 @@ public class EgmCompiler {
 		}*/
 	}
 	
+	public void readTimeline(HashMap<String, String> props) {
+		//TODO: Custom timeline type, and add a "parsed" flag to check for double-setting.
+		Res tm = game.timelines.get(GetId(props));
+		if (tm== null) { throw new RuntimeException("Undefined timeline"); }
+
+		//Save and parse each of its events
+		//TODO
+		/*for (Map.Entry<String,String> entry : objectProps.entrySet()) {
+			if (entry.getKey().startsWith("event-")) {
+				//parseCode(entry.getValue(), objects.get(id).get(entry.getKey()));
+				parseCode("//source", new CodeGen()); //TODO
+			} else {
+				//Save non-code props for later.
+				if (resources.get(name).get(entry.getKey())!=null) { throw new RuntimeException("Object has duplicate property."); }
+				resources.get(name).put(entry.getKey(), entry.getValue());
+			}
+		}*/
+	}
+	
 	//Write output file.
 	public void writeObjectSwitch(BufferedWriter file) throws IOException {
 		file.write("#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n");
@@ -86,6 +105,39 @@ public class EgmCompiler {
 		}
 		
 	    file.write("\n\n#undef NEW_OBJ_PREFIX\n");
+	}
+		
+	//Write output file.
+	public void writeResourceNames(BufferedWriter file) throws IOException {
+		writeSingleResource(file, "object", game.objects, true);
+		writeSingleResource(file, "sprite", game.sprites, true);
+		writeSingleResource(file, "background", game.backgrounds, true);
+		writeSingleResource(file, "font", game.fonts, true);
+		writeSingleResource(file, "timeline", game.timelines, true);
+		writeSingleResource(file, "path", game.paths, true);
+		writeSingleResource(file, "sound", game.sounds, true);
+		writeSingleResource(file, "script", game.scripts, true);
+		writeSingleResource(file, "shader", game.shaders, true);
+		writeSingleResource(file, "room", game.rooms, false);
+	}
+	
+	private void writeSingleResource(BufferedWriter file, String category, TreeMap<Integer, Res> entries, boolean secondHalf) throws IOException {
+		int max = 0;
+		StringBuffer ss = new StringBuffer();
+		file.write("namespace enigma_user {\nenum //" + category + " names\n{\n");
+		for (Res res : entries.values()) {
+			if (res.id >= max) { max = res.id + 1; }
+			file.write("  " + res.name + " = " + res.id + ",\n");
+			if (secondHalf) {
+				ss.append("    case " + res.id + ": return \"" + res.name + "\"; break;\n");
+			}
+		}
+		file.write("};\n}\nnamespace enigma { size_t " + category + "_idmax = " + max + "; }\n\n");
+		
+		if (secondHalf) {
+			file.write("namespace enigma_user {\nstring " + category + "_get_name(int i) {\n switch (i) {\n");
+			file.write(ss.toString() + " default: return \"<undefined>\";}};}\n\n");
+		}
 	}
 	
 	

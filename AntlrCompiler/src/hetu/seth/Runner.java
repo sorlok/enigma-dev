@@ -64,16 +64,25 @@ public class Runner {
 			//Parse scripts
 			//TODO
 			
-			//Parse objects
-			BufferedReader objList = new BufferedReader(new FileReader(main_dir + "parser_objects.txt"));
-			ReadObjectList(objList, compiler);
-			objList.close();
+			//Parse timelines
+			BufferedReader tmList = new BufferedReader(new FileReader(main_dir + "parser_timelines.txt"));
+			ArrayList<HashMap<String, String>> tmlines = ReadSpecialList(tmList, compiler, "timeline_done", "moment-");
+			tmList.close();
+			for (HashMap<String,String> props : tmlines) {
+				compiler.readTimeline(props);
+			}
 			
 			//Parse objects
+			BufferedReader objList = new BufferedReader(new FileReader(main_dir + "parser_objects.txt"));
+			ArrayList<HashMap<String, String>> objs = ReadSpecialList(objList, compiler, "object_done", "event-");
+			objList.close();
+			for (HashMap<String,String> props : objs) {
+				compiler.readObject(props);
+			}
+			
 			//TODO
 			
 			//Now, write the output files.
-			//TODO: Actually write them.
 			BufferedWriter file;
 			
 			//The switch is simple; let's do that one first!
@@ -82,6 +91,15 @@ public class Runner {
 			compiler.writeObjectSwitch(file);
 			file.close();
 			
+			//This one's also pretty easy.
+			file = new BufferedWriter(new FileWriter(editable_dir + "IDE_EDIT_resourcenames.h"));
+			file.write(EgmLicense.Text);
+			compiler.writeResourceNames(file);
+			file.close();
+
+
+			
+			//TODO: Actually write them.
 			file = new BufferedWriter(new FileWriter(editable_dir + "IDE_EDIT_events.h"));
 			file.close();
 			file = new BufferedWriter(new FileWriter(editable_dir + "IDE_EDIT_evparent.h"));
@@ -94,8 +112,7 @@ public class Runner {
 			file.close();
 			file = new BufferedWriter(new FileWriter(editable_dir + "IDE_EDIT_objectfunctionality.h"));
 			file.close();
-			file = new BufferedWriter(new FileWriter(editable_dir + "IDE_EDIT_resourcenames.h"));
-			file.close();
+			
 			file = new BufferedWriter(new FileWriter(editable_dir + "IDE_EDIT_roomarrays.h"));
 			file.close();
 			file = new BufferedWriter(new FileWriter(editable_dir + "IDE_EDIT_roomcreates.h"));
@@ -151,31 +168,32 @@ public class Runner {
 		}
 	}
 	
-	private static void ReadObjectList(BufferedReader objList, EgmCompiler compiler) throws IOException {
-		HashMap<String, String> props = new HashMap<>(); //Key/value for the current object.
-		for (String line=objList.readLine();line!=null;line=objList.readLine()) {
+	private static ArrayList<HashMap<String, String>> ReadSpecialList(BufferedReader srcFile, EgmCompiler compiler, String doneStr, String multiLineStr) throws IOException {
+		ArrayList<HashMap<String, String>> res = new ArrayList<HashMap<String,String>>();
+		HashMap<String, String> props = new HashMap<>(); //Key/value for the current entry.
+		for (String line=srcFile.readLine();line!=null;line=srcFile.readLine()) {
 			//Skip WS
 			line = line.trim();
 			if (line.isEmpty()) { continue; }
 			
 			//Done?
-			if (line.equals("object_done")) {
+			if (line.equals(doneStr)) {
 				//Save, restart.
-				compiler.readObject(props);
+				res.add(props);
 				props = new HashMap<>();
 			} else {
 				String[] parts = line.split(":");
 				if (parts.length != 2) {
-					throw new RuntimeException("Expected object property, but received: \"" + line + "\"");
+					throw new RuntimeException("Expected special property, but received: \"" + line + "\"");
 				}
 				//Events involve reading multiple additional lines.
-				if (parts[0].startsWith("event-")) {
+				if (parts[0].startsWith(multiLineStr)) {
 					int numLines = Integer.parseInt(parts[1]);
 					StringBuilder sb = new StringBuilder();
 					for (int i=0; i<numLines; i++) {
-						line=objList.readLine();
+						line=srcFile.readLine();
 						if (line == null) {
-							throw new RuntimeException("Ran out of lines parsing object with " + numLines+ " lines.");
+							throw new RuntimeException("Ran out of lines parsing special with " + numLines+ " lines.");
 						}
 						sb.append(line.trim()).append("\n");
 					}
@@ -186,7 +204,7 @@ public class Runner {
 				}
 			}
 		}
-		
+		return res;
 	}
 
 }

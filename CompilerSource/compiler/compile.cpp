@@ -597,6 +597,29 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   }
   objlist.close();
 
+  //The details of the timelines matter.
+  std::ofstream tmlist(makedir+"parser_timelines.txt");
+  for (int i = 0; i < es->timelineCount; i++) {
+    tmlist <<"id:" <<es->timelines[i].id <<"\n";
+    tmlist <<"name:" <<es->timelines[i].name <<"\n";
+
+    //Save Moment (Step) specific code.
+    for (int j=0; j<es->timelines[i].momentCount; j++) {
+      //Make sure this moment's code ends in a newline.
+      std::string code = es->timelines[i].moments[j].code;
+      if (code[code.size()-1] != '\n') { code += "\n"; }
+
+      //Save as moment-stepNo:X, followed by X lines of code.
+      const size_t nlCount = std::count(code.begin(), code.end(), '\n');
+      tmlist <<"moment-" <<es->timelines[i].moments[j].stepNo <<":" <<nlCount <<"\n" <<code;
+    }
+
+    tmlist <<"timeline_done\n";
+  }
+  tmlist.close();
+
+
+
   // Some files don't need the new parser.
   GameSettings gameSet = es->gameSettings;
   edbg << "Writing executable information and resources." << flushl;
