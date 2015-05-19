@@ -485,82 +485,78 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Copying sprite names [" << es->spriteCount << "]" << flushl;
   sidelist <<"sprites:" <<es->spriteCount <<"\n";
   for (int i = 0; i < es->spriteCount; i++) {
-    cout << "Name on this side: " << globals_scope.name << endl;
-    cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
-    cout << "Pointer on this side: " << (&globals_scope) << endl;
-    cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
-    
-    sidelist <<es->sprites[i].name <<"\n";
+    sidelist <<es->sprites[i].id <<":" <<es->sprites[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
   }
 
   edbg << "Copying sound names [" << es->soundCount << "]" << flushl;
   sidelist <<"sounds:" <<es->soundCount <<"\n";
   for (int i = 0; i < es->soundCount; i++) {
-    sidelist <<es->sounds[i].name <<"\n";
+    sidelist <<es->sounds[i].id <<":" <<es->sounds[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sounds[i].name);
   }
 
   edbg << "Copying background names [" << es->backgroundCount << "]" << flushl;
   sidelist <<"backgrounds:" <<es->backgroundCount <<"\n";
   for (int i = 0; i < es->backgroundCount; i++) {
-    sidelist <<es->backgrounds[i].name <<"\n";
+    sidelist <<es->backgrounds[i].id <<":" <<es->backgrounds[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->backgrounds[i].name);
   }
 
   edbg << "Copying path names [" << es->pathCount << "]" << flushl;
   sidelist <<"paths:" <<es->pathCount <<"\n";
   for (int i = 0; i < es->pathCount; i++) {
-    sidelist <<es->paths[i].name <<"\n";
+    sidelist <<es->paths[i].id <<":" <<es->paths[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->paths[i].name);
   }
 
   edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
   sidelist <<"scripts:" <<es->scriptCount <<"\n";
   for (int i = 0; i < es->scriptCount; i++) {
-    sidelist <<es->scripts[i].name <<"\n";
+    sidelist <<es->scripts[i].id <<":" <<es->scripts[i].name <<"\n";
     quickmember_script(&globals_scope,es->scripts[i].name);
   }
 
   edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
   sidelist <<"shaders:" <<es->shaderCount <<"\n";
   for (int i = 0; i < es->shaderCount; i++) {
-    sidelist <<es->shaders[i].name <<"\n";
+    sidelist <<es->shaders[i].id <<":" <<es->shaders[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
   }
 
   edbg << "Copying font names [" << es->fontCount << "]" << flushl;
   sidelist <<"fonts:" <<es->fontCount <<"\n";
   for (int i = 0; i < es->fontCount; i++) {
-    sidelist <<es->fonts[i].name <<"\n";
+    sidelist <<es->fonts[i].id <<":" <<es->fonts[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->fonts[i].name);
   }
 
   edbg << "Copying timeline names [" << es->timelineCount << "]" << flushl;
   sidelist <<"timelines:" <<es->timelineCount <<"\n";
   for (int i = 0; i < es->timelineCount; i++) {
-    sidelist <<es->timelines[i].name <<"\n";
+    sidelist <<es->timelines[i].id <<":" <<es->timelines[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->timelines[i].name);
   }
 
   edbg << "Copying object names [" << es->gmObjectCount << "]" << flushl;
   sidelist <<"objects:" <<es->gmObjectCount <<"\n";
   for (int i = 0; i < es->gmObjectCount; i++) {
-    sidelist <<es->gmObjects[i].name <<"\n";
+    sidelist <<es->gmObjects[i].id <<":" <<es->gmObjects[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->gmObjects[i].name);
   }
 
   edbg << "Copying room names [" << es->roomCount << "]" << flushl;
   sidelist <<"rooms:" <<es->roomCount <<"\n";
   for (int i = 0; i < es->roomCount; i++) {
-    sidelist <<es->rooms[i].name <<"\n";
+    sidelist <<es->rooms[i].id <<":" <<es->rooms[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
   }
 
+  int fakeId = 0;
   edbg << "Copying constant names [" << es->constantCount << "]" << flushl;
   sidelist <<"constants:" <<es->constantCount <<"\n";
   for (int i = 0; i < es->constantCount; i++) {
-    sidelist <<es->constants[i].name <<"\n";
+    sidelist <<fakeId++ <<":" <<es->constants[i].name <<"\n";
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->constants[i].name);
   }
 

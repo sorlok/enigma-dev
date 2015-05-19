@@ -3,6 +3,8 @@ package hetu.seth;
 import hetu.seth.WalkTagVariables;
 import hetu.seth.gen.EgmLexer;
 import hetu.seth.gen.EgmParser;
+import hetu.seth.res.Game;
+import hetu.seth.res.Res;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -28,60 +30,58 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class EgmCompiler {
-	public void readResource(String resourceName) {
-		if (resources.get(resourceName)!=null) { throw new RuntimeException("Resource with duplicate name."); }
-		resources.put(resourceName, new TreeMap<String,String>());
+	public void addResource(String category, Res res) {		
+		//Add it to the resource list.
+		if (resourceNames.contains(res.name)) { System.out.println("Warning: Resource with duplicate name \"" + res.name + "\""); }
+		resourceNames.add(res.name);
+		
+		//Add it to the right category.
+		TreeMap<Integer, Res> mapping = game.Lookup.get(category);
+		if (mapping == null) { throw new RuntimeException("Unexpected category: " + category); }
+		if (mapping.containsKey(res.id)) { throw new RuntimeException("Duplicate id for: " + res.name); }
+		mapping.put(new Integer(res.id), res);
 	}
 	
-	public void readScript(String scriptName, String scriptSource) {
-		if (scripts.get(scriptName)!=null) { throw new RuntimeException("Script with duplicate name."); }
-		scripts.put(scriptName, new CodeGen());
-		parseCode(scriptSource, scripts.get(scriptName));
+	private static int GetId(HashMap<String, String> objectProps) {
+		String idStr = objectProps.get("id");
+		if (idStr==null) { throw new RuntimeException("Resource missing required property: id"); }
+		return Integer.parseInt(idStr);
+	}
+	
+	public void readScript(HashMap<String, String> props) {
+		//TODO: Custom script type, and add a "parsed" flag to check for double-setting.
+		Res script = game.scripts.get(GetId(props));
+		if (script == null) { throw new RuntimeException("Undefined script"); }
+		
+		parseCode("//source", new CodeGen()); //TODO
 	}
 	
 	//objectSource is {eventName => eventSource}
-	public void readObject(HashMap<String, String> objectProps) {
-		//Basic properties
-		String name = objectProps.get("name");
-		String idStr = objectProps.get("id");
-		if (name==null) { throw new RuntimeException("Object missing required property: name"); }
-		if (idStr==null) { throw new RuntimeException("Object missing required property: id"); }
-		int id = Integer.parseInt(idStr);
-		
-		//Save it.
-		if (resources.get(name)==null) { throw new RuntimeException("Object not specified in the resource tree."); }
-		if (objects.get(id)!=null) { throw new RuntimeException("Object with duplicate id specified."); }
-		objects.put(id, new TreeMap<String, CodeGen>());
-		
+	public void readObject(HashMap<String, String> props) {
+		//TODO: Custom object type, and add a "parsed" flag to check for double-setting.
+		Res obj = game.objects.get(GetId(props));
+		if (obj == null) { throw new RuntimeException("Undefined object"); }
+
 		//Save and parse each of its events
-		for (Map.Entry<String,String> entry : objectProps.entrySet()) {
+		//TODO
+		/*for (Map.Entry<String,String> entry : objectProps.entrySet()) {
 			if (entry.getKey().startsWith("event-")) {
-				parseCode(entry.getValue(), objects.get(id).get(entry.getKey()));
+				//parseCode(entry.getValue(), objects.get(id).get(entry.getKey()));
+				parseCode("//source", new CodeGen()); //TODO
 			} else {
 				//Save non-code props for later.
 				if (resources.get(name).get(entry.getKey())!=null) { throw new RuntimeException("Object has duplicate property."); }
 				resources.get(name).put(entry.getKey(), entry.getValue());
 			}
-		}
+		}*/
 	}
 	
 	//Write output file.
 	public void writeObjectSwitch(BufferedWriter file) throws IOException {
-		//TODO: We need objects in order by ID, but accessible by name/prop. 
-		//      Our current way of storing data overlaps; for now we just force it.
-		TreeMap<Integer, String> objs = new TreeMap<>();
-		for (Map.Entry<String, TreeMap<String, String>> entry : resources.entrySet()) { //TODO: This will break once we add scripts/timelines!
-			if (entry.getValue().isEmpty()) { continue; }
-			if (!entry.getKey().startsWith("obj_")) { throw new RuntimeException("TODO: Better storage of objects in transit."); }
-			Integer key = Integer.parseInt(entry.getValue().get("id"));
-			String value = entry.getValue().get("name");
-			objs.put(key, value);
-		}
-		
 		file.write("#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n");
-		for (Map.Entry<Integer, String> entry : objs.entrySet()) {
-			file.write("case " + entry.getKey() + ":\n");
-			file.write("    NEW_OBJ_PREFIX new enigma::OBJ_" + entry.getValue() + "(x,y,idn);\n");
+		for (Res entry : game.objects.values()) {
+			file.write("case " + entry.id + ":\n");
+			file.write("    NEW_OBJ_PREFIX new enigma::OBJ_" + entry.name + "(x,y,idn);\n");
 			file.write("  break;\n");
 		}
 		
@@ -121,16 +121,21 @@ public class EgmCompiler {
         walker.walk(new WalkTagVariables(codeGen), tree);
 	}
 	
+	//List of all resource names. 
+	TreeSet<String> resourceNames = new TreeSet<>();
+	
+	//The current game state.
+	Game game = new Game();
 	
 	//A list of all valid resource names. This includes sprites, sounds, etc.
 	//The value is a key-value property set (may be empty) that is used primarily for complex resources like objects.
-	private TreeMap<String, TreeMap<String, String>> resources = new TreeMap<>();
+	//private TreeMap<String, TreeMap<String, String>> resources = new TreeMap<>();
 	
 	//A list of all scripts and their associated CodeGen objects.
-	private TreeMap<String, CodeGen> scripts = new TreeMap<>();
+	//private TreeMap<String, CodeGen> scripts = new TreeMap<>();
 	
 	//A list of all objects and their associated CodeGen objects. (second key is event-mainEvId-subEvId)
-	private TreeMap<Integer, TreeMap<String, CodeGen>> objects = new TreeMap<>();
+	//private TreeMap<Integer, TreeMap<String, CodeGen>> objects = new TreeMap<>();
 	
 	//Book-keeping structure for code that is being generated for a script or object-event.
 	public static class CodeGen {
